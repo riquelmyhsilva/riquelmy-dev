@@ -1,0 +1,18 @@
+---
+title: "ML Forecasting Engine"
+description: "A production-grade time series forecasting system built with Python, scikit-learn, and XGBoost. Supports multiple forecasting horizons, automated feature engineering, and model evaluation with backtesting."
+stack: ["Python", "XGBoost", "scikit-learn", "pandas", "PostgreSQL", "Docker", "Airflow"]
+githubUrl: "https://github.com/example/ml-forecasting-engine"
+liveUrl: ""
+featured: true
+---
+
+This project implements an end-to-end forecasting pipeline for demand planning.
+It ingests historical sales data, generates time-based and lag features, trains
+gradient-boosted models per product category, and serves predictions through a
+REST API.
+
+Key technical decisions included using recursive multi-step forecasting rather
+than direct multi-output, implementing walk-forward validation for honest
+performance estimation, and containerizing the entire stack with Docker Compose
+for reproducible deployments.

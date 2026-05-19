@@ -1,0 +1,188 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+
+const skills = [
+  {
+    category: 'Data Science / ML',
+    items: ['Python', 'scikit-learn', 'XGBoost', 'pandas', 'NumPy', 'TensorFlow', 'statsmodels'],
+  },
+  {
+    category: 'Data Engineering',
+    items: ['SQL', 'Apache Spark', 'Airflow', 'dbt', 'ETL pipelines', 'Data modeling'],
+  },
+  {
+    category: 'Business Intelligence',
+    items: ['Power BI', 'Microsoft Fabric', 'DAX', 'Power Query', 'SSAS', 'Report design'],
+  },
+  {
+    category: 'Programming',
+    items: ['Python', 'TypeScript', 'SQL', 'Bash', 'Git', 'REST APIs'],
+  },
+  {
+    category: 'Infrastructure',
+    items: ['Linux', 'Docker', 'CI/CD', 'Azure', 'PostgreSQL', 'Firebase'],
+  },
+];
+---
+
+<BaseLayout
+  title="About | Riquelmy"
+  description="Background, skills, and current focus areas."
+>
+  <section class="about-page container-main">
+    <header class="about-page__header">
+      <h1 class="about-page__title">About</h1>
+    </header>
+
+    <div class="about-page__content container-article">
+      <div class="about-page__bio">
+        <p>
+          I am a Data Scientist, Data Engineer, and Developer working at the intersection
+          of analytics, machine learning, and software engineering. My day-to-day involves
+          building data pipelines, developing predictive models, and creating dashboards
+          that turn raw data into actionable insight.
+        </p>
+        <p>
+          I have a strong interest in end-to-end data workflows: from raw ingestion and
+          transformation through to model deployment and visualization. I work primarily
+          with Python for data science and engineering, Power BI and Microsoft Fabric
+          for business intelligence, and TypeScript for web development.
+        </p>
+        <p>
+          Outside of work, I maintain a Linux-based development environment, contribute
+          to open-source tooling, and write about the topics I explore on this blog.
+        </p>
+      </div>
+
+      <div class="about-page__section">
+        <h2 class="about-page__subtitle">Current Focus</h2>
+        <ul class="about-page__focus-list">
+          <li>Time series forecasting and demand planning models</li>
+          <li>Building scalable ETL pipelines with modern orchestration</li>
+          <li>Microsoft Fabric adoption and Power BI semantic modeling</li>
+          <li>Technical writing and knowledge sharing</li>
+        </ul>
+      </div>
+
+      <div class="about-page__section">
+        <h2 class="about-page__subtitle">Skills</h2>
+        <div class="about-page__skills">
+          {skills.map(({ category, items }) => (
+            <div class="skill-group">
+              <h3 class="skill-group__title">{category}</h3>
+              <div class="skill-group__items">
+                {items.map((item) => (
+                  <span class="skill-group__tag">{item}</span>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div class="about-page__section">
+        <h2 class="about-page__subtitle">Get in Touch</h2>
+        <p>
+          You can find me on <a href="https://github.com" target="_blank" rel="noopener noreferrer">GitHub</a>
+          and <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer">LinkedIn</a>,
+          or subscribe to the <a href="/rss.xml">RSS feed</a> for new articles.
+        </p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .about-page {
+    padding: 3rem 0 2rem;
+  }
+
+  .about-page__header {
+    margin-bottom: 2.5rem;
+  }
+
+  .about-page__title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: -0.02em;
+  }
+
+  .about-page__bio {
+    margin-bottom: 3rem;
+  }
+
+  .about-page__bio p {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: var(--color-text-muted);
+    margin: 0 0 1rem;
+  }
+
+  .about-page__bio p:last-child {
+    margin-bottom: 0;
+  }
+
+  .about-page__section {
+    margin-bottom: 3rem;
+  }
+
+  .about-page__subtitle {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0 0 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .about-page__focus-list {
+    padding-left: 1.25rem;
+    margin: 0;
+  }
+
+  .about-page__focus-list li {
+    font-size: 0.9375rem;
+    color: var(--color-text-muted);
+    line-height: 1.7;
+    margin-bottom: 0.5rem;
+  }
+
+  .about-page__skills {
+    display: grid;
+    gap: 1.5rem;
+  }
+
+  @media (min-width: 640px) {
+    .about-page__skills {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  .skill-group__title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin: 0 0 0.5rem;
+    color: var(--color-text);
+  }
+
+  .skill-group__items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+  }
+
+  .skill-group__tag {
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    background-color: var(--color-tag-bg);
+    color: var(--color-tag-text);
+  }
+
+  .about-page__section p {
+    font-size: 0.9375rem;
+    color: var(--color-text-muted);
+    line-height: 1.7;
+  }
+</style>

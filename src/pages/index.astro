@@ -1,0 +1,211 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+import ArticleCard from '@components/ArticleCard.astro';
+import ProjectCard from '@components/ProjectCard.astro';
+import { getCollection } from 'astro:content';
+import { getReadingTime } from '@utils/readingTime';
+
+const allPosts = await getCollection('blog', ({ data }) => !data.draft);
+const recentPosts = allPosts
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0, 3);
+
+const featuredProjects = await getCollection('projects', ({ data }) => data.featured);
+---
+
+<BaseLayout
+  title="Riquelmy Henrique Silva"
+  description="Personal site and technical blog covering data science, machine learning, business intelligence, programming, and infrastructure."
+>
+  <!-- Hero -->
+  <section class="hero container-main" aria-labelledby="hero-heading">
+    <div class="hero__content">
+      <p class="hero__greeting">Hello, I am</p>
+      <h1 id="hero-heading" class="hero__name">Riquelmy Henrique Silva</h1>
+      <p class="hero__role">Data Scientist / Data Engineer / Developer</p>
+      <p class="hero__bio">
+        I build data pipelines, train models, craft dashboards, and write about the
+        things I learn along the way. This site is where I share technical articles
+        and project work across data science, machine learning, business intelligence,
+        and infrastructure.
+      </p>
+      <div class="hero__links">
+        <a href="/blog" class="hero__cta hero__cta--primary">Read the blog</a>
+        <a href="/projects" class="hero__cta hero__cta--secondary">View projects</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Recent Articles -->
+  {recentPosts.length > 0 && (
+    <section class="section container-main" aria-labelledby="recent-heading">
+      <div class="section__header">
+        <h2 id="recent-heading" class="section__title">Recent Articles</h2>
+        <a href="/blog" class="section__link">View all</a>
+      </div>
+      <div class="articles-grid">
+        {recentPosts.map((post) => (
+          <ArticleCard
+            title={post.data.title}
+            description={post.data.description}
+            date={post.data.date}
+            tags={post.data.tags}
+            readingTime={getReadingTime(post.body ?? '')}
+            slug={post.id}
+          />
+        ))}
+      </div>
+    </section>
+  )}
+
+  <!-- Featured Projects -->
+  {featuredProjects.length > 0 && (
+    <section class="section container-main" aria-labelledby="projects-heading">
+      <div class="section__header">
+        <h2 id="projects-heading" class="section__title">Featured Projects</h2>
+        <a href="/projects" class="section__link">View all</a>
+      </div>
+      <div class="projects-grid">
+        {featuredProjects.map((project) => (
+          <ProjectCard
+            title={project.data.title}
+            description={project.data.description}
+            stack={project.data.stack}
+            githubUrl={project.data.githubUrl}
+            liveUrl={project.data.liveUrl}
+          />
+        ))}
+      </div>
+    </section>
+  )}
+</BaseLayout>
+
+<style>
+  /* Hero */
+  .hero {
+    padding: 5rem 0 4rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .hero__content {
+    max-width: 640px;
+  }
+
+  .hero__greeting {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-accent);
+    margin: 0 0 0.5rem;
+    letter-spacing: 0.02em;
+  }
+
+  .hero__name {
+    font-size: 3rem;
+    font-weight: 700;
+    line-height: 1.1;
+    margin: 0 0 0.5rem;
+    letter-spacing: -0.03em;
+  }
+
+  @media (max-width: 639px) {
+    .hero__name { font-size: 2.25rem; }
+  }
+
+  .hero__role {
+    font-size: 1.125rem;
+    color: var(--color-text-muted);
+    margin: 0 0 1.5rem;
+    font-weight: 500;
+  }
+
+  .hero__bio {
+    font-size: 1rem;
+    color: var(--color-text-muted);
+    line-height: 1.7;
+    margin: 0 0 2rem;
+    max-width: 540px;
+  }
+
+  .hero__links {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .hero__cta {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.625rem 1.25rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 0.15s ease;
+  }
+
+  .hero__cta--primary {
+    background-color: var(--color-accent);
+    color: #fff;
+  }
+
+  .hero__cta--primary:hover {
+    background-color: var(--color-accent-hover);
+    color: #fff;
+  }
+
+  .hero__cta--secondary {
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+  }
+
+  .hero__cta--secondary:hover {
+    border-color: var(--color-text-muted);
+    background-color: var(--color-surface);
+  }
+
+  /* Sections */
+  .section {
+    padding: 3.5rem 0 0;
+  }
+
+  .section__header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+  }
+
+  .section__title {
+    font-size: 1.375rem;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .section__link {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--color-accent);
+    text-decoration: none;
+  }
+
+  .section__link:hover {
+    color: var(--color-accent-hover);
+  }
+
+  /* Grids */
+  .articles-grid {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .projects-grid {
+    display: grid;
+    gap: 1rem;
+  }
+
+  @media (min-width: 640px) {
+    .projects-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+</style>

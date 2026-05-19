@@ -1,0 +1,86 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+import ProjectCard from '@components/ProjectCard.astro';
+import { getCollection } from 'astro:content';
+
+const allProjects = await getCollection('projects');
+// Featured projects first, then alphabetical
+const projects = allProjects.sort((a, b) => {
+  if (a.data.featured && !b.data.featured) return -1;
+  if (!a.data.featured && b.data.featured) return 1;
+  return a.data.title.localeCompare(b.data.title);
+});
+---
+
+<BaseLayout
+  title="Projects | Riquelmy"
+  description="Portfolio of data science, engineering, and development projects."
+>
+  <section class="projects-page container-main">
+    <header class="projects-page__header">
+      <h1 class="projects-page__title">Projects</h1>
+      <p class="projects-page__desc">
+        A selection of projects spanning data science, data engineering,
+        business intelligence, and software development.
+      </p>
+    </header>
+
+    <div class="projects-page__grid">
+      {projects.map((project) => (
+        <ProjectCard
+          title={project.data.title}
+          description={project.data.description}
+          stack={project.data.stack}
+          githubUrl={project.data.githubUrl}
+          liveUrl={project.data.liveUrl}
+        />
+      ))}
+    </div>
+
+    {projects.length === 0 && (
+      <p class="projects-page__empty">No projects published yet.</p>
+    )}
+  </section>
+</BaseLayout>
+
+<style>
+  .projects-page {
+    padding: 3rem 0 2rem;
+  }
+
+  .projects-page__header {
+    margin-bottom: 2.5rem;
+  }
+
+  .projects-page__title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem;
+    letter-spacing: -0.02em;
+  }
+
+  .projects-page__desc {
+    font-size: 1rem;
+    color: var(--color-text-muted);
+    margin: 0;
+    max-width: 540px;
+  }
+
+  .projects-page__grid {
+    display: grid;
+    gap: 1rem;
+  }
+
+  @media (min-width: 640px) {
+    .projects-page__grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  .projects-page__empty {
+    font-size: 1rem;
+    color: var(--color-text-muted);
+    text-align: center;
+    padding: 3rem 0;
+  }
+</style>

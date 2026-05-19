@@ -1,0 +1,83 @@
+---
+import TagList from './TagList.astro';
+import { formatDate } from '@utils/formatDate';
+
+interface Props {
+  title: string;
+  description: string;
+  date: Date;
+  tags: string[];
+  readingTime: string;
+  slug: string;
+}
+
+const { title, description, date, tags, readingTime, slug } = Astro.props;
+---
+
+<article class="article-card">
+  <a href={`/blog/${slug}`} class="article-card__link">
+    <div class="article-card__meta">
+      <time datetime={date.toISOString()}>{formatDate(date)}</time>
+      <span class="article-card__sep" aria-hidden="true">/</span>
+      <span>{readingTime}</span>
+    </div>
+    <h2 class="article-card__title">{title}</h2>
+    <p class="article-card__desc">{description}</p>
+  </a>
+  <div class="article-card__tags">
+    <TagList tags={tags} linked />
+  </div>
+</article>
+
+<style>
+  .article-card {
+    padding: 1.5rem;
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    background-color: var(--color-surface);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  }
+
+  .article-card:hover {
+    border-color: var(--color-accent-muted);
+    box-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.2);
+    transform: translateY(-2px);
+  }
+
+  .article-card__link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .article-card__meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8125rem;
+    color: var(--color-text-muted);
+    margin-bottom: 0.75rem;
+  }
+
+  .article-card__sep { opacity: 0.4; }
+
+  .article-card__title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    line-height: 1.35;
+    margin: 0 0 0.5rem;
+    color: var(--color-text);
+    transition: color 0.15s ease;
+  }
+
+  .article-card__link:hover .article-card__title {
+    color: var(--color-accent);
+  }
+
+  .article-card__desc {
+    font-size: 0.9375rem;
+    color: var(--color-text-muted);
+    line-height: 1.6;
+    margin: 0 0 1rem;
+  }
+</style>

@@ -1,0 +1,163 @@
+---
+title: Building Robust Data Pipelines with Python
+description: A practical guide to designing, implementing, and monitoring data pipelines using Python. Covers architecture patterns, error handling, and testing strategies.
+date: 2026-05-15
+tags:
+  - python
+  - data-engineering
+  - etl
+  - best-practices
+draft: false
+---
+import Callout from '@components/Callout.astro';
+
+Data pipelines are the backbone of any data-driven organization. They move, transform, and
+deliver data from source systems to destinations where it can be analyzed and acted upon.
+In this article, I will walk through the key principles and patterns for building reliable
+pipelines in Python.
+
+## Why Python for Data Pipelines
+
+Python has become the default language for data engineering work, and for good reason.
+Its ecosystem includes mature libraries for every stage of the pipeline lifecycle:
+extraction (`requests`, `sqlalchemy`), transformation (`pandas`, `polars`), and
+loading (`psycopg2`, `pyarrow`). Combined with orchestration tools like Airflow and
+Prefect, Python provides a complete toolkit.
+
+<Callout type="note">
+This article focuses on batch pipelines. Stream processing with tools like Kafka or Flink
+follows different architectural patterns and warrants separate treatment.
+</Callout>
+
+## Architecture Patterns
+
+There are two dominant patterns for structuring data pipelines:
+
+### Extract-Transform-Load (ETL)
+
+The traditional approach: extract data from a source, transform it in memory or on a
+staging server, then load it into the target system. This works well when transformations
+are complex and you want to minimize load on the destination database.
+
+### Extract-Load-Transform (ELT)
+
+A more modern approach suited to cloud data warehouses like BigQuery or Snowflake. Raw
+data is loaded first, then transformed in place using SQL. This is increasingly preferred
+because it leverages the warehouse's compute power and keeps the pipeline logic simpler.
+
+## A Minimal Pipeline Example
+
+Here is a simplified pipeline that extracts data from a REST API, transforms it with
+pandas, and loads it into PostgreSQL:
+
+```python
+import pandas as pd
+import requests
+from sqlalchemy import create_engine
+
+def extract(url: str) -> dict:
+    """Fetch data from a REST API endpoint."""
+    response = requests.get(url, timeout=30)
+    response.raise_for_status()
+    return response.json()
+
+def transform(raw: dict) -> pd.DataFrame:
+    """Normalize and clean the raw data."""
+    df = pd.json_normalize(raw["results"])
+    df.columns = [col.lower().replace(" ", "_") for col in df.columns]
+    df["extracted_at"] = pd.Timestamp.now(tz="UTC")
+    return df
+
+def load(df: pd.DataFrame, table: str, engine) -> None:
+    """Write the dataframe to a PostgreSQL table."""
+    df.to_sql(table, engine, if_exists="append", index=False)
+
+def run_pipeline():
+    engine = create_engine("postgresql://user:pass@localhost/analytics")
+    raw = extract("https://api.example.com/v1/metrics")
+    df = transform(raw)
+    load(df, "metrics_raw", engine)
+    print(f"Loaded {len(df)} rows into metrics_raw")
+
+if __name__ == "__main__":
+    run_pipeline()
+```
+
+<Callout type="tip">
+Always add a `timeout` parameter to HTTP requests. Without it, a hanging upstream service
+can block your entire pipeline indefinitely.
+</Callout>
+
+## Error Handling Strategies
+
+Production pipelines must handle failures gracefully. Key strategies include:
+
+### Retry with Backoff
+
+Transient errors (network timeouts, rate limits) are common. Use exponential backoff
+to retry without overwhelming the source:
+
+```python
+import time
+
+def fetch_with_retry(url: str, max_retries: int = 3) -> dict:
+    for attempt in range(max_retries):
+        try:
+            response = requests.get(url, timeout=30)
+            response.raise_for_status()
+            return response.json()
+        except requests.RequestException as e:
+            if attempt == max_retries - 1:
+                raise
+            wait = 2 ** attempt
+            print(f"Attempt {attempt + 1} failed: {e}. Retrying in {wait}s.")
+            time.sleep(wait)
+```
+
+### Dead Letter Queues
+
+For record-level failures, write failed records to a separate table or file for later
+inspection rather than halting the entire pipeline.
+
+## Comparison of Pipeline Tools
+
+| Tool       | Type         | Language   | Best For                     |
+|------------|--------------|------------|------------------------------|
+| Airflow    | Orchestrator | Python     | Complex DAG-based workflows  |
+| Prefect    | Orchestrator | Python     | Modern, Pythonic pipelines   |
+| dbt        | Transform    | SQL        | SQL-based transformations    |
+| Luigi      | Orchestrator | Python     | Simple dependency chains     |
+| Dagster    | Orchestrator | Python     | Data asset-oriented approach |
+
+## Testing Your Pipelines
+
+Pipelines deserve the same testing rigor as application code. Focus on three levels:
+
+1. **Unit tests** for individual transform functions using `pytest` and sample data.
+2. **Integration tests** that run against a test database to verify the full extract-load cycle.
+3. **Data quality checks** using tools like `great_expectations` or simple SQL assertions
+   after each load.
+
+<Callout type="warning">
+Never run integration tests against production databases. Use a dedicated test instance or
+containerized PostgreSQL via Docker Compose.
+</Callout>
+
+## Monitoring and Observability
+
+A pipeline that runs without monitoring is a pipeline that fails silently. Implement:
+
+- **Structured logging** with timestamps, pipeline name, and stage identifiers.
+- **Row count assertions** to detect unexpected data volume changes.
+- **Alerting** via Slack or email when a pipeline fails or produces anomalous results.
+- **Lineage tracking** to understand data dependencies across pipelines.
+
+## Conclusion
+
+Building reliable data pipelines requires more than just writing ETL scripts. It demands
+attention to error handling, testing, monitoring, and architectural patterns that scale
+with your organization. Python's ecosystem makes it an excellent choice, but the principles
+discussed here apply regardless of language or tooling.
+
+The investment in pipeline reliability pays dividends: fewer fire drills, higher trust in
+your data, and more time spent on analysis instead of debugging broken ingestion jobs.

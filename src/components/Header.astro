@@ -1,0 +1,249 @@
+---
+import ThemeToggle from './ThemeToggle.astro';
+
+const navLinks = [
+  { href: '/blog', label: 'Blog' },
+  { href: '/projects', label: 'Projects' },
+  { href: '/about', label: 'About' },
+];
+
+const currentPath = Astro.url.pathname;
+---
+
+<header class="header" id="site-header">
+  <div class="header__inner">
+    <a href="/" class="header__logo" aria-label="Home">
+      riquelmy.dev
+    </a>
+
+    <nav class="header__nav" id="main-nav" aria-label="Main navigation">
+      <ul class="header__links" role="list">
+        {navLinks.map(({ href, label }) => (
+          <li>
+            <a
+              href={href}
+              class:list={['header__link', { 'header__link--active': currentPath.startsWith(href) }]}
+            >
+              {label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+
+    <div class="header__actions">
+      <ThemeToggle />
+      <button
+        id="mobile-menu-toggle"
+        class="header__burger"
+        type="button"
+        aria-label="Toggle navigation menu"
+        aria-expanded="false"
+        aria-controls="mobile-menu"
+      >
+        <svg class="burger-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="22" height="22" aria-hidden="true">
+          <line class="burger-line burger-line--top" x1="3" y1="6" x2="21" y2="6" />
+          <line class="burger-line burger-line--mid" x1="3" y1="12" x2="21" y2="12" />
+          <line class="burger-line burger-line--bot" x1="3" y1="18" x2="21" y2="18" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <nav class="mobile-menu" id="mobile-menu" aria-label="Mobile navigation" hidden>
+    <ul class="mobile-menu__links" role="list">
+      {navLinks.map(({ href, label }) => (
+        <li>
+          <a
+            href={href}
+            class:list={['mobile-menu__link', { 'mobile-menu__link--active': currentPath.startsWith(href) }]}
+          >
+            {label}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+</header>
+
+<style>
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    border-bottom: 1px solid var(--color-border);
+    background-color: color-mix(in srgb, var(--color-bg) 85%, transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  .header__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+    height: 3.75rem;
+  }
+
+  .header__logo {
+    font-size: 1.125rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--color-text);
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+
+  .header__logo:hover {
+    color: var(--color-accent);
+  }
+
+  .header__nav {
+    display: none;
+  }
+
+  @media (min-width: 768px) {
+    .header__nav {
+      display: block;
+    }
+  }
+
+  .header__links {
+    display: flex;
+    gap: 2rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .header__link {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    text-decoration: none;
+    transition: color 0.15s ease;
+    position: relative;
+  }
+
+  .header__link:hover {
+    color: var(--color-text);
+  }
+
+  .header__link--active {
+    color: var(--color-text);
+  }
+
+  .header__link--active::after {
+    content: '';
+    position: absolute;
+    bottom: -1.2rem;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: var(--color-accent);
+    border-radius: 1px;
+  }
+
+  .header__actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .header__burger {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition: color 0.15s ease, border-color 0.15s ease;
+  }
+
+  .header__burger:hover {
+    color: var(--color-text);
+    border-color: var(--color-text-muted);
+  }
+
+  @media (min-width: 768px) {
+    .header__burger {
+      display: none;
+    }
+  }
+
+  .burger-line {
+    transition: transform 0.2s ease, opacity 0.2s ease;
+    transform-origin: center;
+  }
+
+  /* Mobile menu */
+  .mobile-menu {
+    border-bottom: 1px solid var(--color-border);
+    padding: 0.75rem 1.5rem 1rem;
+    background-color: var(--color-bg);
+  }
+
+  .mobile-menu[hidden] {
+    display: none;
+  }
+
+  @media (min-width: 768px) {
+    .mobile-menu {
+      display: none !important;
+    }
+  }
+
+  .mobile-menu__links {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .mobile-menu__link {
+    display: block;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    text-decoration: none;
+    border-radius: 6px;
+    transition: color 0.15s ease, background-color 0.15s ease;
+  }
+
+  .mobile-menu__link:hover {
+    color: var(--color-text);
+    background-color: var(--color-surface);
+  }
+
+  .mobile-menu__link--active {
+    color: var(--color-accent);
+    background-color: var(--color-surface);
+  }
+</style>
+
+<script is:inline>
+  (function() {
+    var toggle = document.getElementById('mobile-menu-toggle');
+    var menu = document.getElementById('mobile-menu');
+    if (!toggle || !menu) return;
+
+    toggle.addEventListener('click', function() {
+      var expanded = toggle.getAttribute('aria-expanded') === 'true';
+      toggle.setAttribute('aria-expanded', String(!expanded));
+      if (expanded) {
+        menu.setAttribute('hidden', '');
+      } else {
+        menu.removeAttribute('hidden');
+      }
+    });
+  })();
+</script>

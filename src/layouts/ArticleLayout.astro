@@ -1,0 +1,199 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import TagList from '@components/TagList.astro';
+import TableOfContents from '@components/TableOfContents.astro';
+import { formatDate } from '@utils/formatDate';
+
+interface Heading {
+  depth: number;
+  slug: string;
+  text: string;
+}
+
+interface Props {
+  title: string;
+  description: string;
+  date: Date;
+  tags: string[];
+  readingTime: string;
+  headings: Heading[];
+  prevPost?: { slug: string; title: string } | null;
+  nextPost?: { slug: string; title: string } | null;
+}
+
+const { title, description, date, tags, readingTime, headings, prevPost, nextPost } = Astro.props;
+const showToc = headings.filter((h) => h.depth >= 2 && h.depth <= 3).length >= 3;
+---
+
+<BaseLayout title={`${title} | Riquelmy Henrique Silva`} description={description}>
+  <article class="article-page container-main">
+    <header class="article-page__header container-article">
+      <div class="article-page__meta">
+        <time datetime={date.toISOString()}>{formatDate(date)}</time>
+        <span class="article-page__sep" aria-hidden="true">/</span>
+        <span>{readingTime}</span>
+      </div>
+      <h1 class="article-page__title">{title}</h1>
+      <div class="article-page__tags">
+        <TagList tags={tags} linked />
+      </div>
+    </header>
+
+    <div class:list={['article-page__body', { 'article-page__body--with-toc': showToc }]}>
+      {showToc && (
+        <aside class="article-page__sidebar">
+          <div class="article-page__toc-sticky">
+            <TableOfContents headings={headings} />
+          </div>
+        </aside>
+      )}
+      <div class="article-page__content prose container-article">
+        <slot />
+      </div>
+    </div>
+
+    <nav class="article-page__nav container-article" aria-label="Article navigation">
+      <div class="article-page__nav-item article-page__nav-prev">
+        {prevPost && (
+          <a href={`/blog/${prevPost.slug}`}>
+            <span class="article-page__nav-label">Previous</span>
+            <span class="article-page__nav-title">{prevPost.title}</span>
+          </a>
+        )}
+      </div>
+      <div class="article-page__nav-item article-page__nav-next">
+        {nextPost && (
+          <a href={`/blog/${nextPost.slug}`}>
+            <span class="article-page__nav-label">Next</span>
+            <span class="article-page__nav-title">{nextPost.title}</span>
+          </a>
+        )}
+      </div>
+    </nav>
+  </article>
+</BaseLayout>
+
+<style>
+  .article-page {
+    padding-top: 3rem;
+    padding-bottom: 2rem;
+  }
+
+  .article-page__header {
+    margin-bottom: 3rem;
+  }
+
+  .article-page__meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8125rem;
+    color: var(--color-text-muted);
+    margin-bottom: 1rem;
+  }
+
+  .article-page__sep { opacity: 0.4; }
+
+  .article-page__title {
+    font-size: 2.25rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin: 0 0 1.25rem;
+    letter-spacing: -0.03em;
+  }
+
+  @media (max-width: 639px) {
+    .article-page__title {
+      font-size: 1.75rem;
+    }
+  }
+
+  .article-page__tags {
+    margin-top: 0.5rem;
+  }
+
+  /* Body layout with optional ToC sidebar */
+  .article-page__body {
+    position: relative;
+  }
+
+  .article-page__body--with-toc {
+    display: block;
+  }
+
+  @media (min-width: 1200px) {
+    .article-page__body--with-toc {
+      display: grid;
+      grid-template-columns: 1fr 220px;
+      gap: 3rem;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+  }
+
+  .article-page__sidebar {
+    display: none;
+  }
+
+  @media (min-width: 1200px) {
+    .article-page__sidebar {
+      display: block;
+      order: 2;
+    }
+  }
+
+  .article-page__toc-sticky {
+    position: sticky;
+    top: 5rem;
+  }
+
+  .article-page__content {
+    order: 1;
+  }
+
+  /* Prev / Next navigation */
+  .article-page__nav {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .article-page__nav-item a {
+    display: block;
+    padding: 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    text-decoration: none;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+  }
+
+  .article-page__nav-item a:hover {
+    border-color: var(--color-accent-muted);
+    background-color: var(--color-surface);
+  }
+
+  .article-page__nav-next {
+    text-align: right;
+  }
+
+  .article-page__nav-label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-muted);
+    margin-bottom: 0.25rem;
+  }
+
+  .article-page__nav-title {
+    display: block;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--color-text);
+    line-height: 1.4;
+  }
+</style>
