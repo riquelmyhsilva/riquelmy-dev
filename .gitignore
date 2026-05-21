@@ -20,6 +20,9 @@ pnpm-debug.log*
 .env*.local
 .firebase/
 .vscode/
+src/content/blog/.obsidian
+src/content/blog/.trash
+
 
 # OS-specific files
 .DS_Store

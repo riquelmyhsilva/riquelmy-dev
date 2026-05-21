@@ -1,11 +1,16 @@
 ---
-import BaseLayout from '@layouts/BaseLayout.astro';
+import BaseLayout from "@layouts/BaseLayout.astro";
 ---
 
-<BaseLayout title="Page Not Found | Riquelmy" description="The requested page could not be found.">
+<BaseLayout
+  title="Page Not Found"
+  description="The requested page could not be found."
+>
   <section class="not-found container-main">
     <h1 class="not-found__code">404</h1>
-    <p class="not-found__message">The page you are looking for does not exist.</p>
+    <p class="not-found__message">
+      The page you are looking for does not exist.
+    </p>
     <a href="/" class="not-found__link">Return home</a>
   </section>
 </BaseLayout>

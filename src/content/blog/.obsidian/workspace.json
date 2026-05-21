@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "construindo-um-portfolio-com-google-firebase-e-antigravity.mdx",
+                "file": "introducao-ao-redis.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "construindo-um-portfolio-com-google-firebase-e-antigravity"
+              "title": "introducao-ao-redis"
             }
           },
           {
@@ -228,8 +228,9 @@
   },
   "active": "266e880083ca14ad",
   "lastOpenFiles": [
-    "building-data-pipelines-with-python copy.mdx",
     "construindo-um-portfolio-com-google-firebase-e-antigravity.mdx",
+    "introducao-ao-redis.md",
+    "building-data-pipelines-with-python copy.mdx",
     "construindo-um-portfolio-com-google-firebase-e-antigravity copy.mdx",
     "building-data-pipelines-with-python copy 2.mdx",
     "---.md",
