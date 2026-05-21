@@ -1,4 +1,4 @@
-# riquelmy.dev - Personal Portfolio and Technical Blog
+# [riquelmy.dev](https://riquelmy.dev) - Personal Portfolio and Technical Blog
 
 A static portfolio site and technical blog built with Astro 5, MDX, and Tailwind CSS 4. Deployed to Firebase Hosting.
 
