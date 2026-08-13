@@ -52,6 +52,20 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
+    <!-- Theme Initialization (prevents FOUC) -->
+    <script is:inline>
+      (function() {
+        const STORAGE_KEY = 'theme';
+        const stored = localStorage.getItem(STORAGE_KEY);
+        const theme = (stored === 'light' || stored === 'dark')
+          ? stored
+          : (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+        if (theme === 'light') {
+          document.documentElement.classList.add('light');
+        }
+      })();
+    </script>
+
     <slot name="head" />
   </head>
   <body>

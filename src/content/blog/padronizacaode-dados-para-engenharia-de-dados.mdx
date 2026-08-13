@@ -1,0 +1,138 @@
+---
+title: "Padronização de Dados para Engenharia de Dados: Guia Prático de Produção"
+description: Um guia prático de padronização de dados com enfase em engenharia de dados para produção, focando em normas mais adotadas pelo mercado, melhores práticas e qualidade de dados.
+date: 2026-08-12
+tags:
+  - data-engineering
+  - best-practices
+  - data-quality
+draft: false
+---
+import Callout from '@components/Callout.astro';
+
+No dia a dia como engenheiro de dados, não é incomum nos depararmos com dados completamente bagunçados e sem padrão no processo de engenharia de dados. Os dados veem da fonte em formatos irregulares, sem padrão, com caracteres especiais, espaços, ora com letra maiúscula, ora com letra minúscula. Um verdadeiro caos, parecendo que a cada inserção de dados, foi inventado um padrão diferente. Com esse problema em mãos, esse artigo aborda a maneira correta de padronizar os dados, seguindo as melhores práticas e os padrões mais comuns do mercado com foco em deixar os dados prontos para produção. 
+
+## O problema
+
+Dados vindos de sistemas de ERP ou de notação manual, tem uma tendência a não seguirem um padrão. Principalmente em texto livre, não é incomum encontrar dados que, em teoria, são os mesmos, mas tem diversos formatos diferentes. Cada consumidor reinventa a normalização, gerando retrabalho e inconsistência entre modelos e dashboards. Além disso, a inconsistência dificulta o casting de dados. Portando, é muito importante padronizar o dados para consumo posterior, possibilitando dashboards e análises consistentes.
+
+## Architecture Patterns
+
+
+
+## A Minimal Pipeline Example
+
+Here is a simplified pipeline that extracts data from a REST API, transforms it with
+pandas, and loads it into PostgreSQL:
+
+```python
+import pandas as pd
+import requests
+from sqlalchemy import create_engine
+
+def extract(url: str) -> dict:
+    """Fetch data from a REST API endpoint."""
+    response = requests.get(url, timeout=30)
+    response.raise_for_status()
+    return response.json()
+
+def transform(raw: dict) -> pd.DataFrame:
+    """Normalize and clean the raw data."""
+    df = pd.json_normalize(raw["results"])
+    df.columns = [col.lower().replace(" ", "_") for col in df.columns]
+    df["extracted_at"] = pd.Timestamp.now(tz="UTC")
+    return df
+
+def load(df: pd.DataFrame, table: str, engine) -> None:
+    """Write the dataframe to a PostgreSQL table."""
+    df.to_sql(table, engine, if_exists="append", index=False)
+
+def run_pipeline():
+    engine = create_engine("postgresql://user:pass@localhost/analytics")
+    raw = extract("https://api.example.com/v1/metrics")
+    df = transform(raw)
+    load(df, "metrics_raw", engine)
+    print(f"Loaded {len(df)} rows into metrics_raw")
+
+if __name__ == "__main__":
+    run_pipeline()
+```
+
+<Callout type="tip">
+Always add a `timeout` parameter to HTTP requests. Without it, a hanging upstream service
+can block your entire pipeline indefinitely.
+</Callout>
+
+## Error Handling Strategies
+
+Production pipelines must handle failures gracefully. Key strategies include:
+
+### Retry with Backoff
+
+Transient errors (network timeouts, rate limits) are common. Use exponential backoff
+to retry without overwhelming the source:
+
+```python
+import time
+
+def fetch_with_retry(url: str, max_retries: int = 3) -> dict:
+    for attempt in range(max_retries):
+        try:
+            response = requests.get(url, timeout=30)
+            response.raise_for_status()
+            return response.json()
+        except requests.RequestException as e:
+            if attempt == max_retries - 1:
+                raise
+            wait = 2 ** attempt
+            print(f"Attempt {attempt + 1} failed: {e}. Retrying in {wait}s.")
+            time.sleep(wait)
+```
+
+### Dead Letter Queues
+
+For record-level failures, write failed records to a separate table or file for later
+inspection rather than halting the entire pipeline.
+
+## Comparison of Pipeline Tools
+
+| Tool       | Type         | Language   | Best For                     |
+|------------|--------------|------------|------------------------------|
+| Airflow    | Orchestrator | Python     | Complex DAG-based workflows  |
+| Prefect    | Orchestrator | Python     | Modern, Pythonic pipelines   |
+| dbt        | Transform    | SQL        | SQL-based transformations    |
+| Luigi      | Orchestrator | Python     | Simple dependency chains     |
+| Dagster    | Orchestrator | Python     | Data asset-oriented approach |
+
+## Testing Your Pipelines
+
+Pipelines deserve the same testing rigor as application code. Focus on three levels:
+
+1. **Unit tests** for individual transform functions using `pytest` and sample data.
+2. **Integration tests** that run against a test database to verify the full extract-load cycle.
+3. **Data quality checks** using tools like `great_expectations` or simple SQL assertions
+   after each load.
+
+<Callout type="warning">
+Never run integration tests against production databases. Use a dedicated test instance or
+containerized PostgreSQL via Docker Compose.
+</Callout>
+
+## Monitoring and Observability
+
+A pipeline that runs without monitoring is a pipeline that fails silently. Implement:
+
+- **Structured logging** with timestamps, pipeline name, and stage identifiers.
+- **Row count assertions** to detect unexpected data volume changes.
+- **Alerting** via Slack or email when a pipeline fails or produces anomalous results.
+- **Lineage tracking** to understand data dependencies across pipelines.
+
+## Conclusion
+
+Building reliable data pipelines requires more than just writing ETL scripts. It demands
+attention to error handling, testing, monitoring, and architectural patterns that scale
+with your organization. Python's ecosystem makes it an excellent choice, but the principles
+discussed here apply regardless of language or tooling.
+
+The investment in pipeline reliability pays dividends: fewer fire drills, higher trust in
+your data, and more time spent on analysis instead of debugging broken ingestion jobs.
