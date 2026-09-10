@@ -2,19 +2,26 @@
 import Header from '@components/Header.astro';
 import Footer from '@components/Footer.astro';
 import '@styles/global.css';
+import { getLangFromUrl, getLocalizedPath, type Language } from '../i18n/utils';
 
 interface Props {
   title: string;
   description: string;
   ogImage?: string;
+  lang?: Language;
 }
 
-const { title, description, ogImage = '/og-default.png' } = Astro.props;
+const { title, description, ogImage = '/og-default.png', lang: explicitLang } = Astro.props;
+const lang = explicitLang ?? getLangFromUrl(Astro.url);
+const htmlLang = lang === 'pt' ? 'pt-BR' : 'en';
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const rssHref = lang === 'en' ? '/en/rss.xml' : '/rss.xml';
+const ptAlternateURL = new URL(getLocalizedPath(Astro.url.pathname, 'pt'), Astro.site);
+const enAlternateURL = new URL(getLocalizedPath(Astro.url.pathname, 'en'), Astro.site);
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang={htmlLang}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -24,6 +31,9 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     <meta name="description" content={description} />
 
     <link rel="canonical" href={canonicalURL} />
+    <link rel="alternate" hreflang="pt-BR" href={ptAlternateURL} />
+    <link rel="alternate" hreflang="en" href={enAlternateURL} />
+    <link rel="alternate" hreflang="x-default" href={ptAlternateURL} />
 
     <!-- Open Graph -->
     <meta property="og:type" content="website" />
@@ -39,7 +49,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     <meta name="twitter:image" content={new URL(ogImage, Astro.site)} />
 
     <!-- RSS -->
-    <link rel="alternate" type="application/rss+xml" title="RSS Feed" href="/rss.xml" />
+    <link rel="alternate" type="application/rss+xml" title="RSS Feed" href={rssHref} />
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />

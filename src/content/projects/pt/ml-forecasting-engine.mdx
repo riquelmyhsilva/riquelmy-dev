@@ -1,0 +1,12 @@
+---
+title: "Motor de Previsão com Machine Learning"
+description: "Sistema de previsão de séries temporais de nível de produção construído com Python, scikit-learn e XGBoost. Suporta múltiplos horizontes de previsão, engenharia de features automatizada e avaliação de modelos com backtesting."
+stack: ["Python", "XGBoost", "scikit-learn", "pandas", "PostgreSQL", "Docker", "Airflow"]
+githubUrl: "https://github.com/example/ml-forecasting-engine"
+liveUrl: ""
+featured: true
+---
+
+Este projeto implementa um pipeline completo de previsão para planejamento de demanda. Ele ingere dados históricos de vendas, gera features temporais e de defasagem (lags), treina modelos baseados em gradiente boosted por categoria de produto e expõe predições através de uma API REST.
+
+Entre as principais decisões técnicas estão o uso de previsão recursiva multi-etapas, validação walk-forward para estimativas realistas de desempenho e conteinerização completa da aplicação com Docker Compose para deploys reproduzíveis.

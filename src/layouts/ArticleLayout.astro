@@ -2,7 +2,7 @@
 import BaseLayout from './BaseLayout.astro';
 import TagList from '@components/TagList.astro';
 import TableOfContents from '@components/TableOfContents.astro';
-import { formatDate } from '@utils/formatDate';
+import { getLangFromUrl, formatLocalizedDate, useTranslations, type Language } from '../i18n/utils';
 
 interface Heading {
   depth: number;
@@ -19,23 +19,29 @@ interface Props {
   headings: Heading[];
   prevPost?: { slug: string; title: string } | null;
   nextPost?: { slug: string; title: string } | null;
+  lang?: Language;
 }
 
-const { title, description, date, tags, readingTime, headings, prevPost, nextPost } = Astro.props;
+const { title, description, date, tags, readingTime, headings, prevPost, nextPost, lang: explicitLang } = Astro.props;
+const lang = explicitLang ?? getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
 const showToc = headings.filter((h) => h.depth >= 2 && h.depth <= 3).length >= 3;
+const blogPrefix = lang === 'en' ? '/en/blog' : '/blog';
+
+const getCleanSlug = (slug: string) => slug.replace(/^(pt|en)\//, '');
 ---
 
-<BaseLayout title={`${title} | Riquelmy Henrique Silva`} description={description}>
+<BaseLayout title={`${title} | Riquelmy Henrique Silva`} description={description} lang={lang}>
   <article class="article-page container-main">
     <header class="article-page__header container-article">
       <div class="article-page__meta">
-        <time datetime={date.toISOString()}>{formatDate(date)}</time>
+        <time datetime={date.toISOString()}>{formatLocalizedDate(date, lang)}</time>
         <span class="article-page__sep" aria-hidden="true">/</span>
         <span>{readingTime}</span>
       </div>
       <h1 class="article-page__title">{title}</h1>
       <div class="article-page__tags">
-        <TagList tags={tags} linked />
+        <TagList tags={tags} linked lang={lang} />
       </div>
     </header>
 
@@ -43,7 +49,7 @@ const showToc = headings.filter((h) => h.depth >= 2 && h.depth <= 3).length >= 3
       {showToc && (
         <aside class="article-page__sidebar">
           <div class="article-page__toc-sticky">
-            <TableOfContents headings={headings} />
+            <TableOfContents headings={headings} lang={lang} />
           </div>
         </aside>
       )}
@@ -55,16 +61,16 @@ const showToc = headings.filter((h) => h.depth >= 2 && h.depth <= 3).length >= 3
     <nav class="article-page__nav container-article" aria-label="Article navigation">
       <div class="article-page__nav-item article-page__nav-prev">
         {prevPost && (
-          <a href={`/blog/${prevPost.slug}`}>
-            <span class="article-page__nav-label">Previous</span>
+          <a href={`${blogPrefix}/${getCleanSlug(prevPost.slug)}`}>
+            <span class="article-page__nav-label">{t('article.prev')}</span>
             <span class="article-page__nav-title">{prevPost.title}</span>
           </a>
         )}
       </div>
       <div class="article-page__nav-item article-page__nav-next">
         {nextPost && (
-          <a href={`/blog/${nextPost.slug}`}>
-            <span class="article-page__nav-label">Next</span>
+          <a href={`${blogPrefix}/${getCleanSlug(nextPost.slug)}`}>
+            <span class="article-page__nav-label">{t('article.next')}</span>
             <span class="article-page__nav-title">{nextPost.title}</span>
           </a>
         )}

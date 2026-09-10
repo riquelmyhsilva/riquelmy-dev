@@ -1,6 +1,6 @@
 ---
-title: "Padronização de Dados para Engenharia de Dados: Guia Prático de Produção"
-description: Um guia prático de padronização de dados com enfase em engenharia de dados para produção, focando em normas mais adotadas pelo mercado, melhores práticas e qualidade de dados.
+title: "Data Standardization for Data Engineering: A Practical Production Guide"
+description: A practical guide to data standardization with an emphasis on production data engineering, focusing on market standards, best practices, and data quality.
 date: 2026-08-12
 tags:
   - data-engineering
@@ -10,20 +10,27 @@ draft: false
 ---
 import Callout from '@components/Callout.astro';
 
-No dia a dia como engenheiro de dados, não é incomum nos depararmos com dados completamente bagunçados e sem padrão no processo de engenharia de dados. Os dados veem da fonte em formatos irregulares, sem padrão, com caracteres especiais, espaços, ora com letra maiúscula, ora com letra minúscula. Um verdadeiro caos, parecendo que a cada inserção de dados, foi inventado um padrão diferente. Com esse problema em mãos, esse artigo aborda a maneira correta de padronizar os dados, seguindo as melhores práticas e os padrões mais comuns do mercado com foco em deixar os dados prontos para produção. 
+In the day-to-day life of a data engineer, it is common to encounter unstandardized, messy data across ingestion pipelines. Data arrives from sources in inconsistent formats, with special characters, extraneous spaces, mixed casing, and conflicting conventions. This article covers practical techniques to standardize data, following industry best practices and patterns to ensure data is production-ready.
 
-## O problema
+## The Problem
 
-Dados vindos de sistemas de ERP ou de notação manual, tem uma tendência a não seguirem um padrão. Principalmente em texto livre, não é incomum encontrar dados que, em teoria, são os mesmos, mas tem diversos formatos diferentes. Cada consumidor reinventa a normalização, gerando retrabalho e inconsistência entre modelos e dashboards. Além disso, a inconsistência dificulta o casting de dados. Portando, é muito importante padronizar o dados para consumo posterior, possibilitando dashboards e análises consistentes.
+Data coming from ERP systems or manual entry often lacks uniform structure. Especially in free-text fields, identical entities are frequently recorded in divergent formats. When consumers reinvent normalization individually, it creates rework and discrepancies across downstream models and dashboards. Standardizing upstream establishes consistency and reliability.
 
 ## Architecture Patterns
 
+There are two dominant patterns for structuring data pipelines:
 
+### Extract-Transform-Load (ETL)
+
+The traditional approach: extract data from a source, transform it in memory or on a staging server, then load it into the target system. This works well when transformations are complex and you want to minimize load on the destination database.
+
+### Extract-Load-Transform (ELT)
+
+A more modern approach suited to cloud data warehouses like BigQuery or Snowflake. Raw data is loaded first, then transformed in place using SQL. This is increasingly preferred because it leverages the warehouse's compute power and keeps the pipeline logic simpler.
 
 ## A Minimal Pipeline Example
 
-Here is a simplified pipeline that extracts data from a REST API, transforms it with
-pandas, and loads it into PostgreSQL:
+Here is a simplified pipeline that extracts data from a REST API, transforms it with pandas, and loads it into PostgreSQL:
 
 ```python
 import pandas as pd
@@ -59,8 +66,7 @@ if __name__ == "__main__":
 ```
 
 <Callout type="tip">
-Always add a `timeout` parameter to HTTP requests. Without it, a hanging upstream service
-can block your entire pipeline indefinitely.
+Always add a `timeout` parameter to HTTP requests. Without it, a hanging upstream service can block your entire pipeline indefinitely.
 </Callout>
 
 ## Error Handling Strategies
@@ -69,8 +75,7 @@ Production pipelines must handle failures gracefully. Key strategies include:
 
 ### Retry with Backoff
 
-Transient errors (network timeouts, rate limits) are common. Use exponential backoff
-to retry without overwhelming the source:
+Transient errors (network timeouts, rate limits) are common. Use exponential backoff to retry without overwhelming the source:
 
 ```python
 import time
@@ -91,8 +96,7 @@ def fetch_with_retry(url: str, max_retries: int = 3) -> dict:
 
 ### Dead Letter Queues
 
-For record-level failures, write failed records to a separate table or file for later
-inspection rather than halting the entire pipeline.
+For record-level failures, write failed records to a separate table or file for later inspection rather than halting the entire pipeline.
 
 ## Comparison of Pipeline Tools
 
@@ -110,12 +114,10 @@ Pipelines deserve the same testing rigor as application code. Focus on three lev
 
 1. **Unit tests** for individual transform functions using `pytest` and sample data.
 2. **Integration tests** that run against a test database to verify the full extract-load cycle.
-3. **Data quality checks** using tools like `great_expectations` or simple SQL assertions
-   after each load.
+3. **Data quality checks** using tools like `great_expectations` or simple SQL assertions after each load.
 
 <Callout type="warning">
-Never run integration tests against production databases. Use a dedicated test instance or
-containerized PostgreSQL via Docker Compose.
+Never run integration tests against production databases. Use a dedicated test instance or containerized PostgreSQL via Docker Compose.
 </Callout>
 
 ## Monitoring and Observability
@@ -129,10 +131,4 @@ A pipeline that runs without monitoring is a pipeline that fails silently. Imple
 
 ## Conclusion
 
-Building reliable data pipelines requires more than just writing ETL scripts. It demands
-attention to error handling, testing, monitoring, and architectural patterns that scale
-with your organization. Python's ecosystem makes it an excellent choice, but the principles
-discussed here apply regardless of language or tooling.
-
-The investment in pipeline reliability pays dividends: fewer fire drills, higher trust in
-your data, and more time spent on analysis instead of debugging broken ingestion jobs.
+Building reliable data pipelines requires more than just writing ETL scripts. It demands attention to error handling, testing, monitoring, and architectural patterns that scale with your organization.

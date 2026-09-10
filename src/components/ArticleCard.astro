@@ -1,6 +1,6 @@
 ---
 import TagList from './TagList.astro';
-import { formatDate } from '@utils/formatDate';
+import { getLangFromUrl, formatLocalizedDate, type Language } from '../i18n/utils';
 
 interface Props {
   title: string;
@@ -9,15 +9,19 @@ interface Props {
   tags: string[];
   readingTime: string;
   slug: string;
+  lang?: Language;
 }
 
-const { title, description, date, tags, readingTime, slug } = Astro.props;
+const { title, description, date, tags, readingTime, slug, lang: explicitLang } = Astro.props;
+const lang = explicitLang ?? getLangFromUrl(Astro.url);
+const cleanSlug = slug.replace(/^(pt|en)\//, '');
+const postHref = lang === 'en' ? `/en/blog/${cleanSlug}` : `/blog/${cleanSlug}`;
 ---
 
 <article class="article-card">
-  <a href={`/blog/${slug}`} class="article-card__link">
+  <a href={postHref} class="article-card__link">
     <div class="article-card__meta">
-      <time datetime={date.toISOString()}>{formatDate(date)}</time>
+      <time datetime={date.toISOString()}>{formatLocalizedDate(date, lang)}</time>
       <span class="article-card__sep" aria-hidden="true">/</span>
       <span>{readingTime}</span>
     </div>
@@ -25,7 +29,7 @@ const { title, description, date, tags, readingTime, slug } = Astro.props;
     <p class="article-card__desc">{description}</p>
   </a>
   <div class="article-card__tags">
-    <TagList tags={tags} linked />
+    <TagList tags={tags} linked lang={lang} />
   </div>
 </article>
 

@@ -1,0 +1,94 @@
+---
+import { getLangFromUrl, getLocalizedPath } from '../i18n/utils';
+
+const currentPath = Astro.url.pathname;
+const currentLang = getLangFromUrl(Astro.url);
+
+const ptHref = getLocalizedPath(currentPath, 'pt');
+const enHref = getLocalizedPath(currentPath, 'en');
+---
+
+<div class="lang-toggle" role="group" aria-label="Language selector">
+  <a
+    href={ptHref}
+    class:list={['lang-toggle__btn', { 'lang-toggle__btn--active': currentLang === 'pt' }]}
+    aria-label="Português"
+    aria-current={currentLang === 'pt' ? 'true' : undefined}
+    data-lang="pt"
+  >
+    PT
+  </a>
+  <span class="lang-toggle__sep" aria-hidden="true">|</span>
+  <a
+    href={enHref}
+    class:list={['lang-toggle__btn', { 'lang-toggle__btn--active': currentLang === 'en' }]}
+    aria-label="English"
+    aria-current={currentLang === 'en' ? 'true' : undefined}
+    data-lang="en"
+  >
+    EN
+  </a>
+</div>
+
+<script is:inline>
+  (function() {
+    document.querySelectorAll('.lang-toggle a').forEach(function(link) {
+      link.addEventListener('click', function() {
+        var targetLang = this.getAttribute('data-lang');
+        if (targetLang) {
+          try {
+            localStorage.setItem('lang', targetLang);
+          } catch (e) {}
+        }
+      });
+    });
+  })();
+</script>
+
+<style>
+  .lang-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.4rem;
+    height: 2.25rem;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background-color: var(--color-surface);
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    user-select: none;
+    box-sizing: border-box;
+    flex-shrink: 0;
+  }
+
+  .lang-toggle__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.2rem 0.45rem;
+    border-radius: 5px;
+    text-decoration: none;
+    color: var(--color-text-muted);
+    transition: color 0.15s ease, background-color 0.15s ease;
+  }
+
+  .lang-toggle__btn:hover:not(.lang-toggle__btn--active) {
+    color: var(--color-text);
+  }
+
+  .lang-toggle__btn--active {
+    background-color: var(--color-accent);
+    color: #ffffff !important;
+    cursor: default;
+    pointer-events: none;
+  }
+
+  .lang-toggle__sep {
+    color: var(--color-border);
+    font-size: 0.7rem;
+    opacity: 0.8;
+  }
+</style>

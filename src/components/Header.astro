@@ -1,10 +1,18 @@
 ---
 import ThemeToggle from './ThemeToggle.astro';
+import LanguageToggle from './LanguageToggle.astro';
+import { getLangFromUrl, useTranslations } from '../i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+const prefix = lang === 'en' ? '/en' : '';
+const homeHref = lang === 'en' ? '/en' : '/';
 
 const navLinks = [
-  { href: '/blog', label: 'Blog' },
-  { href: '/projects', label: 'Projects' },
-  { href: '/about', label: 'About' },
+  { href: `${prefix}/blog`, label: t('nav.blog') },
+  { href: `${prefix}/projects`, label: t('nav.projects') },
+  { href: `${prefix}/about`, label: t('nav.about') },
 ];
 
 const currentPath = Astro.url.pathname;
@@ -12,7 +20,7 @@ const currentPath = Astro.url.pathname;
 
 <header class="header" id="site-header">
   <div class="header__inner">
-    <a href="/" class="header__logo" aria-label="Home">
+    <a href={homeHref} class="header__logo" aria-label="Home">
       riquelmy.dev
     </a>
 
@@ -22,7 +30,7 @@ const currentPath = Astro.url.pathname;
           <li>
             <a
               href={href}
-              class:list={['header__link', { 'header__link--active': currentPath.startsWith(href) }]}
+              class:list={['header__link', { 'header__link--active': currentPath === href || (href !== '/' && href !== '/en' && currentPath.startsWith(href)) }]}
             >
               {label}
             </a>
@@ -32,6 +40,7 @@ const currentPath = Astro.url.pathname;
     </nav>
 
     <div class="header__actions">
+      <LanguageToggle />
       <ThemeToggle />
       <button
         id="mobile-menu-toggle"
@@ -56,7 +65,7 @@ const currentPath = Astro.url.pathname;
         <li>
           <a
             href={href}
-            class:list={['mobile-menu__link', { 'mobile-menu__link--active': currentPath.startsWith(href) }]}
+            class:list={['mobile-menu__link', { 'mobile-menu__link--active': currentPath === href || (href !== '/' && href !== '/en' && currentPath.startsWith(href)) }]}
           >
             {label}
           </a>

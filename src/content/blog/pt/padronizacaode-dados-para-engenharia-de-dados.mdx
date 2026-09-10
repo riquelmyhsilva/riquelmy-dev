@@ -1,0 +1,134 @@
+---
+title: "Padronização de Dados para Engenharia de Dados: Guia Prático de Produção"
+description: Um guia prático de padronização de dados com enfase em engenharia de dados para produção, focando em normas mais adotadas pelo mercado, melhores práticas e qualidade de dados.
+date: 2026-08-12
+tags:
+  - data-engineering
+  - best-practices
+  - data-quality
+draft: false
+---
+import Callout from '@components/Callout.astro';
+
+No dia a dia como engenheiro de dados, não é incomum nos depararmos com dados completamente bagunçados e sem padrão no processo de engenharia de dados. Os dados veem da fonte em formatos irregulares, sem padrão, com caracteres especiais, espaços, ora com letra maiúscula, ora com letra minúscula. Um verdadeiro caos, parecendo que a cada inserção de dados, foi inventado um padrão diferente. Com esse problema em mãos, esse artigo aborda a maneira correta de padronizar os dados, seguindo as melhores práticas e os padrões mais comuns do mercado com foco em deixar os dados prontos para produção. 
+
+## O problema
+
+Dados vindos de sistemas de ERP ou de notação manual, tem uma tendência a não seguirem um padrão. Principalmente em texto livre, não é incomum encontrar dados que, em teoria, são os mesmos, mas tem diversos formatos diferentes. Cada consumidor reinventa a normalização, gerando retrabalho e inconsistência entre modelos e dashboards. Além disso, a inconsistência dificulta o casting de dados. Portando, é muito importante padronizar o dados para consumo posterior, possibilitando dashboards e análises consistentes.
+
+## Padrões de Arquitetura
+
+Existem dois padrões dominantes para estruturação de pipelines de dados:
+
+### Extract-Transform-Load (ETL)
+
+A abordagem tradicional: extrair dados de uma fonte, transformá-los em memória ou em um servidor intermediário e, em seguida, carregá-los no sistema de destino. Funciona bem quando as transformações são complexas e você deseja minimizar a carga no banco de dados de destino.
+
+### Extract-Load-Transform (ELT)
+
+Uma abordagem mais moderna voltada para cloud data warehouses como BigQuery ou Snowflake. Os dados brutos são carregados primeiro e depois transformados no próprio banco usando SQL. Isso é cada vez mais preferido porque aproveita o poder de computação do warehouse e mantém a lógica do pipeline mais simples.
+
+## Exemplo Mínimo de Pipeline
+
+Aqui está um pipeline simplificado que extrai dados de uma API REST, transforma com pandas e carrega no PostgreSQL:
+
+```python
+import pandas as pd
+import requests
+from sqlalchemy import create_engine
+
+def extract(url: str) -> dict:
+    """Fetch data from a REST API endpoint."""
+    response = requests.get(url, timeout=30)
+    response.raise_for_status()
+    return response.json()
+
+def transform(raw: dict) -> pd.DataFrame:
+    """Normalize and clean the raw data."""
+    df = pd.json_normalize(raw["results"])
+    df.columns = [col.lower().replace(" ", "_") for col in df.columns]
+    df["extracted_at"] = pd.Timestamp.now(tz="UTC")
+    return df
+
+def load(df: pd.DataFrame, table: str, engine) -> None:
+    """Write the dataframe to a PostgreSQL table."""
+    df.to_sql(table, engine, if_exists="append", index=False)
+
+def run_pipeline():
+    engine = create_engine("postgresql://user:pass@localhost/analytics")
+    raw = extract("https://api.example.com/v1/metrics")
+    df = transform(raw)
+    load(df, "metrics_raw", engine)
+    print(f"Loaded {len(df)} rows into metrics_raw")
+
+if __name__ == "__main__":
+    run_pipeline()
+```
+
+<Callout type="tip">
+Sempre adicione um parâmetro `timeout` nas requisições HTTP. Sem isso, um serviço externo lento pode bloquear seu pipeline indefinidamente.
+</Callout>
+
+## Estratégias de Tratamento de Erros
+
+Pipelines em produção devem lidar com falhas de forma resiliente. Algumas estratégias essenciais incluem:
+
+### Retry com Backoff
+
+Erros transitórios (timeouts de rede, limites de taxa) são comuns. Use backoff exponencial para tentar novamente sem sobrecarregar a fonte:
+
+```python
+import time
+
+def fetch_with_retry(url: str, max_retries: int = 3) -> dict:
+    for attempt in range(max_retries):
+        try:
+            response = requests.get(url, timeout=30)
+            response.raise_for_status()
+            return response.json()
+        except requests.RequestException as e:
+            if attempt == max_retries - 1:
+                raise
+            wait = 2 ** attempt
+            print(f"Tentativa {attempt + 1} falhou: {e}. Tentando novamente em {wait}s.")
+            time.sleep(wait)
+```
+
+### Dead Letter Queues
+
+Para falhas no nível de registro individual, grave os registros problemáticos em uma tabela ou arquivo separado para inspeção posterior, em vez de interromper todo o pipeline.
+
+## Comparativo de Ferramentas de Pipeline
+
+| Ferramenta | Tipo         | Linguagem  | Mais Indicado Para           |
+|------------|--------------|------------|------------------------------|
+| Airflow    | Orquestrador | Python     | Fluxos complexos baseados em DAG |
+| Prefect    | Orquestrador | Python     | Pipelines modernos e idiomáticos |
+| dbt        | Transformação| SQL        | Transformações baseadas em SQL |
+| Luigi      | Orquestrador | Python     | Cadeias de dependências simples |
+| Dagster    | Orquestrador | Python     | Abordagem orientada a ativos de dados |
+
+## Testando Seus Pipelines
+
+Pipelines merecem o mesmo rigor de teste que o código de aplicação:
+
+1. **Testes unitários** para funções de transformação individuais usando `pytest` e dados de exemplo.
+2. **Testes de integração** que rodam contra um banco de testes para verificar o ciclo completo de extração e carga.
+3. **Validações de qualidade de dados** usando ferramentas como `great_expectations` ou asserções SQL simples após cada carga.
+
+<Callout type="warning">
+Nunca execute testes de integração em bancos de dados de produção. Use uma instância dedicada de teste ou PostgreSQL conteinerizado via Docker Compose.
+</Callout>
+
+## Monitoramento e Observabilidade
+
+Um pipeline que roda sem monitoramento é um pipeline que falha silenciosamente:
+
+- **Logs estruturados** com timestamps, nome do pipeline e identificadores de etapa.
+- **Asserções de contagem de linhas** para detectar alterações inesperadas de volume de dados.
+- **Alertas** via Slack ou e-mail quando um pipeline falha ou produz resultados anômalos.
+- **Rastreamento de linhagem (lineage)** para compreender dependências de dados.
+
+## Conclusão
+
+Construir pipelines de dados confiáveis exige mais do que escrever scripts ETL. Demanda atenção a tratamento de erros, testes, monitoramento e padrões de arquitetura que escalem com sua organização. O investimento em confiabilidade se traduz em menos incidentes, maior confiança nos dados e mais tempo para análises de alto impacto.

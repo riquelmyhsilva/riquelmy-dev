@@ -3,19 +3,19 @@ import { getCollection } from 'astro:content';
 import type { APIContext } from 'astro';
 
 export async function GET(context: APIContext) {
-  const posts = await getCollection('blog', ({ data }) => !data.draft);
+  const posts = await getCollection('blog', ({ id, data }) => !data.draft && id.startsWith('pt/'));
   const sorted = posts.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 
   return rss({
-    title: 'rxduardo',
-    description: 'Technical articles on data science, machine learning, business intelligence, programming, and infrastructure.',
+    title: 'Riquelmy Henrique Silva',
+    description: 'Artigos técnicos sobre ciência de dados, machine learning, business intelligence, programação e infraestrutura.',
     site: context.site!,
     items: sorted.map((post) => ({
       title: post.data.title,
       description: post.data.description,
       pubDate: post.data.date,
-      link: `/blog/${post.id}/`,
+      link: `/blog/${post.id.replace(/^pt\//, '')}/`,
     })),
-    customData: '<language>en-us</language>',
+    customData: '<language>pt-br</language>',
   });
 }

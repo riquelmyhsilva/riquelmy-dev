@@ -1,0 +1,135 @@
+---
+title: Construindo Pipelines de Dados Robustos com Python
+description: Um guia prático para projetar, implementar e monitorar pipelines de dados usando Python. Abrange padrões de arquitetura, tratamento de erros e testes.
+date: 2026-05-15
+tags:
+  - python
+  - data-engineering
+  - etl
+  - best-practices
+draft: false
+---
+import Callout from '@components/Callout.astro';
+
+Pipelines de dados são a espinha dorsal de qualquer organização orientada a dados. Eles movem, transformam e entregam dados dos sistemas de origem para destinos onde podem ser analisados e utilizados para tomada de decisão. Neste artigo, abordaremos os principais princípios e padrões para construir pipelines confiáveis em Python.
+
+## Por que Python para Pipelines de Dados
+
+Python se tornou a linguagem padrão para engenharia de dados. Seu ecossistema inclui bibliotecas maduras para cada etapa do ciclo de vida: extração (`requests`, `sqlalchemy`), transformação (`pandas`, `polars`) e carga (`psycopg2`, `pyarrow`). Combinado a orquestradores como Airflow e Prefect, Python oferece um kit completo de ferramentas.
+
+<Callout type="note">
+Este artigo foca em pipelines em lote (batch). Processamento de streaming com Kafka ou Flink segue padrões arquiteturais diferentes.
+</Callout>
+
+## Padrões de Arquitetura
+
+Existem dois padrões dominantes para estruturar pipelines de dados:
+
+### Extract-Transform-Load (ETL)
+
+A abordagem tradicional: extrair dados de uma fonte, transformá-los em memória ou em uma camada temporária e, em seguida, carregá-los no destino. Funciona bem quando transformações são complexas e se deseja minimizar carga no banco de destino.
+
+### Extract-Load-Transform (ELT)
+
+Abordagem moderna adotada por data warehouses na nuvem (BigQuery, Snowflake). Os dados brutos são carregados primeiro e transformados internamente via SQL, aproveitando a capacidade computacional do warehouse.
+
+## Exemplo Mínimo de Pipeline
+
+Aqui está um pipeline simplificado que extrai dados de uma API REST, aplica transformações com pandas e carrega no PostgreSQL:
+
+```python
+import pandas as pd
+import requests
+from sqlalchemy import create_engine
+
+def extract(url: str) -> dict:
+    """Extrai dados de um endpoint REST."""
+    response = requests.get(url, timeout=30)
+    response.raise_for_status()
+    return response.json()
+
+def transform(raw: dict) -> pd.DataFrame:
+    """Normaliza e limpa os dados brutos."""
+    df = pd.json_normalize(raw["results"])
+    df.columns = [col.lower().replace(" ", "_") for col in df.columns]
+    df["extracted_at"] = pd.Timestamp.now(tz="UTC")
+    return df
+
+def load(df: pd.DataFrame, table: str, engine) -> None:
+    """Escreve o dataframe em uma tabela PostgreSQL."""
+    df.to_sql(table, engine, if_exists="append", index=False)
+
+def run_pipeline():
+    engine = create_engine("postgresql://user:pass@localhost/analytics")
+    raw = extract("https://api.example.com/v1/metrics")
+    df = transform(raw)
+    load(df, "metrics_raw", engine)
+    print(f"Carregados {len(df)} registros em metrics_raw")
+
+if __name__ == "__main__":
+    run_pipeline()
+```
+
+<Callout type="tip">
+Sempre defina um parâmetro de `timeout` nas requisições HTTP para evitar bloqueios indeterminados.
+</Callout>
+
+## Estratégias de Tratamento de Erros
+
+Pipelines em produção precisam lidar com falhas de forma resiliente:
+
+### Retry com Backoff
+
+Erros transitórios (timeouts de rede, rate limits) são frequentes. Use backoff exponencial:
+
+```python
+import time
+
+def fetch_with_retry(url: str, max_retries: int = 3) -> dict:
+    for attempt in range(max_retries):
+        try:
+            response = requests.get(url, timeout=30)
+            response.raise_for_status()
+            return response.json()
+        except requests.RequestException as e:
+            if attempt == max_retries - 1:
+                raise
+            wait = 2 ** attempt
+            print(f"Tentativa {attempt + 1} falhou: {e}. Nova tentativa em {wait}s.")
+            time.sleep(wait)
+```
+
+### Dead Letter Queues
+
+Para falhas pontuais de formato em registros específicos, envie os dados problemáticos para uma tabela ou fila de quarentena, evitando parar todo o lote.
+
+## Comparativo de Ferramentas
+
+| Ferramenta | Tipo         | Linguagem  | Mais Indicado Para           |
+|------------|--------------|------------|------------------------------|
+| Airflow    | Orquestrador | Python     | Fluxos DAG complexos         |
+| Prefect    | Orquestrador | Python     | Pipelines modernos em Python |
+| dbt        | Transformação| SQL        | Transformações analíticas SQL|
+| Luigi      | Orquestrador | Python     | Dependências lineares        |
+| Dagster    | Orquestrador | Python     | Pipelines orientados a dados |
+
+## Testes em Pipelines
+
+1. **Testes unitários** para funções individuais de transformação com `pytest`.
+2. **Testes de integração** rodando contra banco de dados de teste (ex: PostgreSQL em container Docker).
+3. **Checagens de qualidade de dados** com `great_expectations` ou asserções automáticas pós-carga.
+
+<Callout type="warning">
+Nunca execute testes de integração diretamente em ambientes ou bancos de produção.
+</Callout>
+
+## Monitoramento e Observabilidade
+
+- **Logs estruturados** com timestamps, identificador da execução e da etapa.
+- **Asserções de volumetria** para flagrar variações abruptas no volume ingerido.
+- **Alertas automáticos** via webhook/Slack para falhas imediatas.
+- **Rastreabilidade de linhagem** para mapear impactos ponta a ponta.
+
+## Conclusão
+
+Construir pipelines confiáveis vai além do código de transformação: trata-se de garantir resiliência, testabilidade e visibilidade sobre a saúde dos dados.

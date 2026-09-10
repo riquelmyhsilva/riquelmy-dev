@@ -1,29 +1,32 @@
 ---
 import ArticleLayout from '@layouts/ArticleLayout.astro';
 import { getCollection, render } from 'astro:content';
-import { getReadingTime } from '@utils/readingTime';
+import { getLocalizedReadingTime } from '../../i18n/utils';
 
 export async function getStaticPaths() {
-  const posts = await getCollection('blog', ({ data }) => !data.draft);
+  const posts = await getCollection('blog', ({ id, data }) => !data.draft && id.startsWith('pt/'));
   const sorted = posts.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 
-  return sorted.map((post, index) => ({
-    params: { slug: post.id },
-    props: {
-      post,
-      prevPost: index < sorted.length - 1
-        ? { slug: sorted[index + 1].id, title: sorted[index + 1].data.title }
-        : null,
-      nextPost: index > 0
-        ? { slug: sorted[index - 1].id, title: sorted[index - 1].data.title }
-        : null,
-    },
-  }));
+  return sorted.map((post, index) => {
+    const cleanSlug = post.id.replace(/^pt\//, '');
+    return {
+      params: { slug: cleanSlug },
+      props: {
+        post,
+        prevPost: index < sorted.length - 1
+          ? { slug: sorted[index + 1].id.replace(/^pt\//, ''), title: sorted[index + 1].data.title }
+          : null,
+        nextPost: index > 0
+          ? { slug: sorted[index - 1].id.replace(/^pt\//, ''), title: sorted[index - 1].data.title }
+          : null,
+      },
+    };
+  });
 }
 
 const { post, prevPost, nextPost } = Astro.props;
 const { Content, headings } = await render(post);
-const readingTime = getReadingTime(post.body ?? '');
+const readingTime = getLocalizedReadingTime(post.body ?? '', 'pt');
 ---
 
 <ArticleLayout
@@ -35,6 +38,7 @@ const readingTime = getReadingTime(post.body ?? '');
   headings={headings}
   prevPost={prevPost}
   nextPost={nextPost}
+  lang="pt"
 >
   <Content />
 </ArticleLayout>

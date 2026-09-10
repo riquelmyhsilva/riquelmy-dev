@@ -2,8 +2,11 @@
 import BaseLayout from '@layouts/BaseLayout.astro';
 import ProjectCard from '@components/ProjectCard.astro';
 import { getCollection } from 'astro:content';
+import { useTranslations } from '../i18n/utils';
 
-const allProjects = await getCollection('projects');
+const t = useTranslations('pt');
+
+const allProjects = await getCollection('projects', ({ id }) => id.startsWith('pt/'));
 // Featured projects first, then alphabetical
 const projects = allProjects.sort((a, b) => {
   if (a.data.featured && !b.data.featured) return -1;
@@ -13,15 +16,15 @@ const projects = allProjects.sort((a, b) => {
 ---
 
 <BaseLayout
-  title="Projects | Riquelmy"
-  description="Portfolio of data science, engineering, and development projects."
+  title={`${t('projects.title')} | Riquelmy`}
+  description={t('projects.metaDesc')}
+  lang="pt"
 >
   <section class="projects-page container-main">
     <header class="projects-page__header">
-      <h1 class="projects-page__title">Projects</h1>
+      <h1 class="projects-page__title">{t('projects.title')}</h1>
       <p class="projects-page__desc">
-        A selection of projects spanning data science, data engineering,
-        business intelligence, and software development.
+        {t('projects.desc')}
       </p>
     </header>
 
@@ -33,12 +36,13 @@ const projects = allProjects.sort((a, b) => {
           stack={project.data.stack}
           githubUrl={project.data.githubUrl}
           liveUrl={project.data.liveUrl}
+          lang="pt"
         />
       ))}
     </div>
 
     {projects.length === 0 && (
-      <p class="projects-page__empty">No projects published yet.</p>
+      <p class="projects-page__empty">{t('projects.empty')}</p>
     )}
   </section>
 </BaseLayout>

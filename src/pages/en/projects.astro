@@ -1,0 +1,90 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+import ProjectCard from '@components/ProjectCard.astro';
+import { getCollection } from 'astro:content';
+import { useTranslations } from '../../i18n/utils';
+
+const t = useTranslations('en');
+
+const allProjects = await getCollection('projects', ({ id }) => id.startsWith('en/'));
+// Featured projects first, then alphabetical
+const projects = allProjects.sort((a, b) => {
+  if (a.data.featured && !b.data.featured) return -1;
+  if (!a.data.featured && b.data.featured) return 1;
+  return a.data.title.localeCompare(b.data.title);
+});
+---
+
+<BaseLayout
+  title={`${t('projects.title')} | Riquelmy`}
+  description={t('projects.metaDesc')}
+  lang="en"
+>
+  <section class="projects-page container-main">
+    <header class="projects-page__header">
+      <h1 class="projects-page__title">{t('projects.title')}</h1>
+      <p class="projects-page__desc">
+        {t('projects.desc')}
+      </p>
+    </header>
+
+    <div class="projects-page__grid">
+      {projects.map((project) => (
+        <ProjectCard
+          title={project.data.title}
+          description={project.data.description}
+          stack={project.data.stack}
+          githubUrl={project.data.githubUrl}
+          liveUrl={project.data.liveUrl}
+          lang="en"
+        />
+      ))}
+    </div>
+
+    {projects.length === 0 && (
+      <p class="projects-page__empty">{t('projects.empty')}</p>
+    )}
+  </section>
+</BaseLayout>
+
+<style>
+  .projects-page {
+    padding: 3rem 0 2rem;
+  }
+
+  .projects-page__header {
+    margin-bottom: 2.5rem;
+  }
+
+  .projects-page__title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem;
+    letter-spacing: -0.02em;
+  }
+
+  .projects-page__desc {
+    font-size: 1rem;
+    color: var(--color-text-muted);
+    margin: 0;
+    max-width: 540px;
+  }
+
+  .projects-page__grid {
+    display: grid;
+    gap: 1rem;
+  }
+
+  @media (min-width: 640px) {
+    .projects-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  .projects-page__empty {
+    font-size: 1rem;
+    color: var(--color-text-muted);
+    text-align: center;
+    padding: 3rem 0;
+  }
+</style>

@@ -1,4 +1,6 @@
 ---
+import { getLangFromUrl, useTranslations, type Language } from '../i18n/utils';
+
 interface Heading {
   depth: number;
   slug: string;
@@ -7,9 +9,12 @@ interface Heading {
 
 interface Props {
   headings: Heading[];
+  lang?: Language;
 }
 
-const { headings } = Astro.props;
+const { headings, lang: explicitLang } = Astro.props;
+const lang = explicitLang ?? getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
 
 // Only show if 3+ headings exist
 const filtered = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
@@ -18,7 +23,7 @@ const show = filtered.length >= 3;
 
 {show && (
   <nav class="toc" aria-label="Table of contents">
-    <p class="toc__title">On this page</p>
+    <p class="toc__title">{t('article.toc')}</p>
     <ul class="toc__list" role="list">
       {filtered.map((heading) => (
         <li class:list={['toc__item', { 'toc__item--nested': heading.depth === 3 }]}>

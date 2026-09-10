@@ -2,9 +2,11 @@
 import BaseLayout from '@layouts/BaseLayout.astro';
 import ArticleCard from '@components/ArticleCard.astro';
 import { getCollection } from 'astro:content';
-import { getReadingTime } from '@utils/readingTime';
+import { getLocalizedReadingTime, useTranslations } from '../../i18n/utils';
 
-const allPosts = await getCollection('blog', ({ data }) => !data.draft);
+const t = useTranslations('pt');
+
+const allPosts = await getCollection('blog', ({ id, data }) => !data.draft && id.startsWith('pt/'));
 const posts = allPosts.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 
 // Collect all unique tags
@@ -12,21 +14,22 @@ const allTags = [...new Set(posts.flatMap((p) => p.data.tags))].sort();
 ---
 
 <BaseLayout
-  title="Blog | Riquelmy"
-  description="Technical articles on data science, machine learning, business intelligence, programming, and infrastructure."
+  title={`${t('blog.title')} | Riquelmy`}
+  description={t('blog.metaDesc')}
+  lang="pt"
 >
   <section class="blog-page container-main">
     <header class="blog-page__header">
-      <h1 class="blog-page__title">Blog</h1>
+      <h1 class="blog-page__title">{t('blog.title')}</h1>
       <p class="blog-page__desc">
-        Technical writing on data science, engineering, and software development.
+        {t('blog.desc')}
       </p>
     </header>
 
     <!-- Tag filter -->
     {allTags.length > 0 && (
-      <div class="blog-page__filters" id="tag-filters" role="group" aria-label="Filter articles by tag">
-        <button class="filter-tag filter-tag--active" data-tag="all" type="button">All</button>
+      <div class="blog-page__filters" id="tag-filters" role="group" aria-label="Filtrar artigos por tag">
+        <button class="filter-tag filter-tag--active" data-tag="all" type="button">{t('blog.filterAll')}</button>
         {allTags.map((tag) => (
           <button class="filter-tag" data-tag={tag} type="button">{tag}</button>
         ))}
@@ -42,15 +45,16 @@ const allTags = [...new Set(posts.flatMap((p) => p.data.tags))].sort();
             description={post.data.description}
             date={post.data.date}
             tags={post.data.tags}
-            readingTime={getReadingTime(post.body ?? '')}
+            readingTime={getLocalizedReadingTime(post.body ?? '', 'pt')}
             slug={post.id}
+            lang="pt"
           />
         </div>
       ))}
     </div>
 
     {posts.length === 0 && (
-      <p class="blog-page__empty">No articles published yet.</p>
+      <p class="blog-page__empty">{t('blog.empty')}</p>
     )}
   </section>
 </BaseLayout>

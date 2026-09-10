@@ -1,15 +1,20 @@
 ---
+import { getLangFromUrl, useTranslations } from '../i18n/utils';
+
 const currentYear = new Date().getFullYear();
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const rssHref = lang === 'en' ? '/en/rss.xml' : '/rss.xml';
 ---
 
 <footer class="footer">
   <div class="footer__inner">
     <div class="footer__left">
-      <p class="footer__copy">&copy; {currentYear} Riquelmy. All rights reserved.</p>
+      <p class="footer__copy">&copy; {currentYear} Riquelmy. {t('footer.rights')}</p>
     </div>
     <div class="footer__right">
       <nav class="footer__links" aria-label="Footer links">
-        <a href="/rss.xml" class="footer__link" aria-label="RSS Feed">RSS</a>
+        <a href={rssHref} class="footer__link" aria-label="RSS Feed">{t('footer.rss')}</a>
         <a href="https://github.com" class="footer__link" target="_blank" rel="noopener noreferrer" aria-label="GitHub profile">GitHub</a>
         <a href="https://linkedin.com" class="footer__link" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn profile">LinkedIn</a>
       </nav>

@@ -1,71 +1,62 @@
 ---
 import BaseLayout from '@layouts/BaseLayout.astro';
+import { useTranslations } from '../i18n/utils';
+
+const t = useTranslations('pt');
 
 const skills = [
   {
-    category: 'Data Science / ML',
+    category: t('about.skills.ds'),
     items: ['Python', 'scikit-learn', 'XGBoost', 'pandas', 'NumPy', 'TensorFlow', 'statsmodels'],
   },
   {
-    category: 'Data Engineering',
-    items: ['SQL', 'Apache Spark', 'Airflow', 'dbt', 'ETL pipelines', 'Data modeling'],
+    category: t('about.skills.de'),
+    items: ['SQL', 'Apache Spark', 'Airflow', 'dbt', 'ETL pipelines', 'Modelagem de dados'],
   },
   {
-    category: 'Business Intelligence',
-    items: ['Power BI', 'Microsoft Fabric', 'DAX', 'Power Query', 'SSAS', 'Report design'],
+    category: t('about.skills.bi'),
+    items: ['Power BI', 'Microsoft Fabric', 'DAX', 'Power Query', 'SSAS', 'Design de relatórios'],
   },
   {
-    category: 'Programming',
+    category: t('about.skills.prog'),
     items: ['Python', 'TypeScript', 'SQL', 'Bash', 'Git', 'REST APIs'],
   },
   {
-    category: 'Infrastructure',
+    category: t('about.skills.infra'),
     items: ['Linux', 'Docker', 'CI/CD', 'Azure', 'PostgreSQL', 'Firebase'],
   },
 ];
 ---
 
 <BaseLayout
-  title="About | Riquelmy"
-  description="Background, skills, and current focus areas."
+  title={`${t('about.title')} | Riquelmy`}
+  description={t('about.metaDesc')}
+  lang="pt"
 >
   <section class="about-page container-main">
     <header class="about-page__header">
-      <h1 class="about-page__title">About</h1>
+      <h1 class="about-page__title">{t('about.title')}</h1>
     </header>
 
     <div class="about-page__content container-article">
       <div class="about-page__bio">
-        <p>
-          I am a Data Scientist, Data Engineer, and Developer working at the intersection
-          of analytics, machine learning, and software engineering. My day-to-day involves
-          building data pipelines, developing predictive models, and creating dashboards
-          that turn raw data into actionable insight.
-        </p>
-        <p>
-          I have a strong interest in end-to-end data workflows: from raw ingestion and
-          transformation through to model deployment and visualization. I work primarily
-          with Python for data science and engineering, Power BI and Microsoft Fabric
-          for business intelligence, and TypeScript for web development.
-        </p>
-        <p>
-          Outside of work, I maintain a Linux-based development environment, contribute
-          to open-source tooling, and write about the topics I explore on this blog.
-        </p>
+        <p>{t('about.bio1')}</p>
+        <p>{t('about.bio2')}</p>
+        <p>{t('about.bio3')}</p>
       </div>
 
       <div class="about-page__section">
-        <h2 class="about-page__subtitle">Current Focus</h2>
+        <h2 class="about-page__subtitle">{t('about.focusTitle')}</h2>
         <ul class="about-page__focus-list">
-          <li>Time series forecasting and demand planning models</li>
-          <li>Building scalable ETL pipelines with modern orchestration</li>
-          <li>Microsoft Fabric adoption and Power BI semantic modeling</li>
-          <li>Technical writing and knowledge sharing</li>
+          <li>{t('about.focus1')}</li>
+          <li>{t('about.focus2')}</li>
+          <li>{t('about.focus3')}</li>
+          <li>{t('about.focus4')}</li>
         </ul>
       </div>
 
       <div class="about-page__section">
-        <h2 class="about-page__subtitle">Skills</h2>
+        <h2 class="about-page__subtitle">{t('about.skillsTitle')}</h2>
         <div class="about-page__skills">
           {skills.map(({ category, items }) => (
             <div class="skill-group">
@@ -81,11 +72,10 @@ const skills = [
       </div>
 
       <div class="about-page__section">
-        <h2 class="about-page__subtitle">Get in Touch</h2>
+        <h2 class="about-page__subtitle">{t('about.contactTitle')}</h2>
         <p>
-          You can find me on <a href="https://github.com" target="_blank" rel="noopener noreferrer">GitHub</a>
-          and <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer">LinkedIn</a>,
-          or subscribe to the <a href="/rss.xml">RSS feed</a> for new articles.
+          {t('about.contactP1')} <a href="https://github.com" target="_blank" rel="noopener noreferrer">GitHub</a>
+          {t('about.contactP2')} <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer">LinkedIn</a>{t('about.contactP3')} <a href="/rss.xml">feed RSS</a> {t('about.contactP4')}
         </p>
       </div>
     </div>

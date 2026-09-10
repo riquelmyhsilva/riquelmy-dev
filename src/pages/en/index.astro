@@ -1,0 +1,213 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+import ArticleCard from '@components/ArticleCard.astro';
+import ProjectCard from '@components/ProjectCard.astro';
+import { getCollection } from 'astro:content';
+import { getLocalizedReadingTime, useTranslations } from '../../i18n/utils';
+
+const t = useTranslations('en');
+
+const allPosts = await getCollection('blog', ({ id, data }) => !data.draft && id.startsWith('en/'));
+const recentPosts = allPosts
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0, 3);
+
+const featuredProjects = await getCollection('projects', ({ id, data }) => data.featured && id.startsWith('en/'));
+---
+
+<BaseLayout
+  title={t('site.title')}
+  description={t('site.description')}
+  lang="en"
+>
+  <!-- Hero -->
+  <section class="hero container-main" aria-labelledby="hero-heading">
+    <div class="hero__content">
+      <p class="hero__greeting">{t('hero.greeting')}</p>
+      <h1 id="hero-heading" class="hero__name">{t('hero.name')}</h1>
+      <p class="hero__role">{t('hero.role')}</p>
+      <p class="hero__bio">
+        {t('hero.bio')}
+      </p>
+      <div class="hero__links">
+        <a href="/en/blog" class="hero__cta hero__cta--primary">{t('hero.ctaBlog')}</a>
+        <a href="/en/projects" class="hero__cta hero__cta--secondary">{t('hero.ctaProjects')}</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Recent Articles -->
+  {recentPosts.length > 0 && (
+    <section class="section container-main" aria-labelledby="recent-heading">
+      <div class="section__header">
+        <h2 id="recent-heading" class="section__title">{t('section.recentArticles')}</h2>
+        <a href="/en/blog" class="section__link">{t('section.viewAll')}</a>
+      </div>
+      <div class="articles-grid">
+        {recentPosts.map((post) => (
+          <ArticleCard
+            title={post.data.title}
+            description={post.data.description}
+            date={post.data.date}
+            tags={post.data.tags}
+            readingTime={getLocalizedReadingTime(post.body ?? '', 'en')}
+            slug={post.id}
+            lang="en"
+          />
+        ))}
+      </div>
+    </section>
+  )}
+
+  <!-- Featured Projects -->
+  {featuredProjects.length > 0 && (
+    <section class="section container-main" aria-labelledby="projects-heading">
+      <div class="section__header">
+        <h2 id="projects-heading" class="section__title">{t('section.featuredProjects')}</h2>
+        <a href="/en/projects" class="section__link">{t('section.viewAll')}</a>
+      </div>
+      <div class="projects-grid">
+        {featuredProjects.map((project) => (
+          <ProjectCard
+            title={project.data.title}
+            description={project.data.description}
+            stack={project.data.stack}
+            githubUrl={project.data.githubUrl}
+            liveUrl={project.data.liveUrl}
+            lang="en"
+          />
+        ))}
+      </div>
+    </section>
+  )}
+</BaseLayout>
+
+<style>
+  /* Hero */
+  .hero {
+    padding: 5rem 0 4rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .hero__content {
+    max-width: 640px;
+  }
+
+  .hero__greeting {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-accent);
+    margin: 0 0 0.5rem;
+    letter-spacing: 0.02em;
+  }
+
+  .hero__name {
+    font-size: 3rem;
+    font-weight: 700;
+    line-height: 1.1;
+    margin: 0 0 0.5rem;
+    letter-spacing: -0.03em;
+  }
+
+  @media (max-width: 639px) {
+    .hero__name { font-size: 2.25rem; }
+  }
+
+  .hero__role {
+    font-size: 1.125rem;
+    color: var(--color-text-muted);
+    margin: 0 0 1.5rem;
+    font-weight: 500;
+  }
+
+  .hero__bio {
+    font-size: 1rem;
+    color: var(--color-text-muted);
+    line-height: 1.7;
+    margin: 0 0 2rem;
+    max-width: 540px;
+  }
+
+  .hero__links {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .hero__cta {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.625rem 1.25rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 0.15s ease;
+  }
+
+  .hero__cta--primary {
+    background-color: var(--color-accent);
+    color: #fff;
+  }
+
+  .hero__cta--primary:hover {
+    background-color: var(--color-accent-hover);
+    color: #fff;
+  }
+
+  .hero__cta--secondary {
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+  }
+
+  .hero__cta--secondary:hover {
+    border-color: var(--color-text-muted);
+    background-color: var(--color-surface);
+  }
+
+  /* Sections */
+  .section {
+    padding: 3.5rem 0 0;
+  }
+
+  .section__header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+  }
+
+  .section__title {
+    font-size: 1.375rem;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .section__link {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--color-accent);
+    text-decoration: none;
+  }
+
+  .section__link:hover {
+    color: var(--color-accent-hover);
+  }
+
+  /* Grids */
+  .articles-grid {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .projects-grid {
+    display: grid;
+    gap: 1rem;
+  }
+
+  @media (min-width: 640px) {
+    .projects-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+</style>
