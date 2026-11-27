@@ -8,8 +8,10 @@ import tailwindcss from '@tailwindcss/vite';
 export default defineConfig({
   site: 'https://riquelmy.dev',
   output: 'static',
+  trailingSlash: 'never',
   prefetch: {
-    prefetchAll: true,
+    prefetchAll: false,
+    defaultStrategy: 'hover',
   },
   i18n: {
     defaultLocale: 'pt',
@@ -21,14 +23,15 @@ export default defineConfig({
   integrations: [
     mdx(),
     sitemap({
-      filter: (page) => {
-        const pathname = new URL(page).pathname;
-        return pathname !== '/links' && pathname !== '/links/';
-      },
+      filter: (page) => !new URL(page).pathname.startsWith('/links'),
     }),
   ],
   vite: {
     plugins: [tailwindcss()],
+    build: {
+      assetsInlineLimit: /** @param {string} filePath */ (filePath) =>
+        /\.(m?js)$/.test(filePath) ? false : undefined,
+    },
   },
   markdown: {
     shikiConfig: {

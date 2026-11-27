@@ -67,30 +67,22 @@
   }
 </style>
 
-<script is:inline>
-  (function() {
-    const STORAGE_KEY = 'theme';
+<script>
+  const STORAGE_KEY = 'theme';
 
-    function getPreferred() {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored === 'light' || stored === 'dark') return stored;
-      return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
-    }
+  document.addEventListener('click', (e) => {
+    if (!(e.target instanceof Element) || !e.target.closest('#theme-toggle')) return;
 
-    function apply(theme) {
-      document.documentElement.classList.toggle('light', theme === 'light');
-      localStorage.setItem(STORAGE_KEY, theme);
-    }
+    const next = document.documentElement.classList.contains('light') ? 'dark' : 'light';
+    document.documentElement.classList.toggle('light', next === 'light');
 
-    // Apply on load (runs before paint since is:inline)
-    apply(getPreferred());
-
-    // Toggle on click
-    document.addEventListener('click', function(e) {
-      if (e.target.closest('#theme-toggle')) {
-        var current = document.documentElement.classList.contains('light') ? 'light' : 'dark';
-        apply(current === 'dark' ? 'light' : 'dark');
+    const systemTheme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+    try {
+      if (next === systemTheme) {
+        localStorage.removeItem(STORAGE_KEY);
+      } else {
+        localStorage.setItem(STORAGE_KEY, next);
       }
-    });
-  })();
+    } catch {}
+  });
 </script>
