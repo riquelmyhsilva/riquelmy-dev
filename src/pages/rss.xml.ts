@@ -10,11 +10,12 @@ export async function GET(context: APIContext) {
     title: 'Riquelmy Henrique Silva',
     description: 'Artigos técnicos sobre ciência de dados, machine learning, business intelligence, programação e infraestrutura.',
     site: context.site!,
+    trailingSlash: false,
     items: sorted.map((post) => ({
       title: post.data.title,
       description: post.data.description,
       pubDate: post.data.date,
-      link: `/blog/${post.id.replace(/^pt\//, '')}/`,
+      link: `/blog/${post.id.replace(/^pt\//, '')}`,
     })),
     customData: '<language>pt-br</language>',
   });

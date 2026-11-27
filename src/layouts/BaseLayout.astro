@@ -2,6 +2,7 @@
 import Header from '@components/Header.astro';
 import Footer from '@components/Footer.astro';
 import { ClientRouter, fade } from 'astro:transitions';
+import interLatinWoff2 from '@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url';
 import '@styles/global.css';
 import { getLangFromUrl, getLocalizedPath, type Language } from '../i18n/utils';
 
@@ -35,7 +36,7 @@ const enAlternateURL = !noindex ? new URL(getLocalizedPath(Astro.url.pathname, '
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="generator" content={Astro.generator} />
+    <meta name="color-scheme" content="dark light" />
 
     <title>{title}</title>
     {!minimal && <ClientRouter />}
@@ -71,30 +72,34 @@ const enAlternateURL = !noindex ? new URL(getLocalizedPath(Astro.url.pathname, '
       </>
     )}
 
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
-      rel="stylesheet"
-    />
+    <!-- Critical Self-Hosted Font Preload -->
+    <link rel="preload" href={interLatinWoff2} as="font" type="font/woff2" crossorigin />
 
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
     <!-- Theme Initialization (prevents FOUC) -->
-    <script is:inline>
-      (function() {
+    <script is:inline data-astro-transition-persist="theme-init">
+      (function () {
+        function getStoredTheme() {
+          try {
+            return localStorage.getItem('theme');
+          } catch {
+            return null;
+          }
+        }
         function applyTheme() {
-          const STORAGE_KEY = 'theme';
-          const stored = localStorage.getItem(STORAGE_KEY);
+          const stored = getStoredTheme();
           const theme = (stored === 'light' || stored === 'dark')
             ? stored
             : (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
           document.documentElement.classList.toggle('light', theme === 'light');
         }
         applyTheme();
-        document.addEventListener('astro:after-swap', applyTheme);
+        if (!window.__astroThemeSwapBound) {
+          window.__astroThemeSwapBound = true;
+          document.addEventListener('astro:after-swap', applyTheme);
+        }
       })();
     </script>
 

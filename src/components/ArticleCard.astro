@@ -19,7 +19,7 @@ const postHref = lang === 'en' ? `/en/blog/${cleanSlug}` : `/blog/${cleanSlug}`;
 ---
 
 <article class="article-card">
-  <a href={postHref} class="article-card__link">
+  <a href={postHref} class="article-card__link" data-astro-prefetch>
     <div class="article-card__meta">
       <time datetime={date.toISOString()}>{formatLocalizedDate(date, lang)}</time>
       <span class="article-card__sep" aria-hidden="true">/</span>

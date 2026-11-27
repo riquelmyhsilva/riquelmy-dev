@@ -29,9 +29,9 @@ const allTags = [...new Set(posts.flatMap((p) => p.data.tags))].sort();
     <!-- Tag filter -->
     {allTags.length > 0 && (
       <div class="blog-page__filters" id="tag-filters" role="group" aria-label="Filtrar artigos por tag">
-        <button class="filter-tag filter-tag--active" data-tag="all" type="button">{t('blog.filterAll')}</button>
+        <button class="filter-tag filter-tag--active" data-tag="all" type="button" aria-pressed="true">{t('blog.filterAll')}</button>
         {allTags.map((tag) => (
-          <button class="filter-tag" data-tag={tag} type="button">{tag}</button>
+          <button class="filter-tag" data-tag={tag} type="button" aria-pressed="false">{tag}</button>
         ))}
       </div>
     )}
@@ -57,50 +57,63 @@ const allTags = [...new Set(posts.flatMap((p) => p.data.tags))].sort();
       <p class="blog-page__empty">{t('blog.empty')}</p>
     )}
   </section>
-</BaseLayout>
 
-<script is:inline>
-  (function() {
-    var filters = document.getElementById('tag-filters');
-    var items = document.querySelectorAll('#articles-list .blog-page__item');
-    if (!filters) return;
+  <script>
+    function initBlogFilters() {
+      const filters = document.getElementById('tag-filters');
+      const items = document.querySelectorAll<HTMLElement>('#articles-list .blog-page__item');
+      if (!filters) return;
 
-    // Read initial tag from URL
-    var params = new URLSearchParams(window.location.search);
-    var initial = params.get('tag') || 'all';
+      const buttons = Array.from(filters.querySelectorAll<HTMLButtonElement>('.filter-tag'));
+      const validTags = new Set(buttons.map((btn) => btn.getAttribute('data-tag') ?? ''));
 
-    function activate(tag) {
-      // Update buttons
-      filters.querySelectorAll('.filter-tag').forEach(function(btn) {
-        btn.classList.toggle('filter-tag--active', btn.getAttribute('data-tag') === tag);
-      });
-      // Filter articles
-      items.forEach(function(item) {
-        if (tag === 'all') {
-          item.style.display = '';
+      const params = new URLSearchParams(window.location.search);
+      const requested = params.get('tag') || 'all';
+      const initial = validTags.has(requested) ? requested : 'all';
+
+      function activate(tag: string) {
+        const resolvedTag = validTags.has(tag) ? tag : 'all';
+
+        buttons.forEach((btn) => {
+          const isSelected = btn.getAttribute('data-tag') === resolvedTag;
+          btn.classList.toggle('filter-tag--active', isSelected);
+          btn.setAttribute('aria-pressed', String(isSelected));
+        });
+
+        items.forEach((item) => {
+          if (resolvedTag === 'all') {
+            item.style.display = '';
+          } else {
+            const tags = (item.getAttribute('data-tags') || '').split(',');
+            item.style.display = tags.includes(resolvedTag) ? '' : 'none';
+          }
+        });
+
+        const url = new URL(window.location.href);
+        if (resolvedTag === 'all') {
+          url.searchParams.delete('tag');
         } else {
-          var tags = (item.getAttribute('data-tags') || '').split(',');
-          item.style.display = tags.indexOf(tag) !== -1 ? '' : 'none';
+          url.searchParams.set('tag', resolvedTag);
         }
-      });
-      // Update URL without reload
-      var url = new URL(window.location);
-      if (tag === 'all') {
-        url.searchParams.delete('tag');
-      } else {
-        url.searchParams.set('tag', tag);
+        history.replaceState(null, '', url);
       }
-      history.replaceState(null, '', url);
+
+      activate(initial);
+
+      if (filters.dataset.bound !== 'true') {
+        filters.dataset.bound = 'true';
+        filters.addEventListener('click', (e) => {
+          if (!(e.target instanceof Element)) return;
+          const btn = e.target.closest<HTMLButtonElement>('.filter-tag');
+          if (btn) activate(btn.getAttribute('data-tag') || 'all');
+        });
+      }
     }
 
-    activate(initial);
-
-    filters.addEventListener('click', function(e) {
-      var btn = e.target.closest('.filter-tag');
-      if (btn) activate(btn.getAttribute('data-tag'));
-    });
-  })();
-</script>
+    initBlogFilters();
+    document.addEventListener('astro:page-load', initBlogFilters);
+  </script>
+</BaseLayout>
 
 <style>
   .blog-page {

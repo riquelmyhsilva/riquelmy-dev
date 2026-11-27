@@ -20,7 +20,7 @@ const currentPath = Astro.url.pathname;
 
 <header class="header" id="site-header" transition:animate="none">
   <div class="header__inner">
-    <a href={homeHref} class="header__logo" aria-label="Home">
+    <a href={homeHref} class="header__logo" aria-label="Home" data-astro-prefetch>
       riquelmy.dev
     </a>
 
@@ -33,6 +33,7 @@ const currentPath = Astro.url.pathname;
               <a
                 href={href}
                 class:list={['header__link', { 'header__link--active': isActive }]}
+                data-astro-prefetch
               >
                 {label}
                 {isActive && <span class="header__indicator" transition:name="nav-indicator" aria-hidden="true"></span>}
@@ -70,6 +71,7 @@ const currentPath = Astro.url.pathname;
           <a
             href={href}
             class:list={['mobile-menu__link', { 'mobile-menu__link--active': currentPath === href || (href !== '/' && href !== '/en' && currentPath.startsWith(href)) }]}
+            data-astro-prefetch
           >
             {label}
           </a>
@@ -242,20 +244,27 @@ const currentPath = Astro.url.pathname;
   }
 </style>
 
-<script is:inline>
-  (function() {
-    var toggle = document.getElementById('mobile-menu-toggle');
-    var menu = document.getElementById('mobile-menu');
-    if (!toggle || !menu) return;
+<script>
+  document.addEventListener('click', (e) => {
+    if (!(e.target instanceof Element)) return;
+    const toggle = e.target.closest('#mobile-menu-toggle');
+    if (!toggle) return;
+    const menu = document.getElementById('mobile-menu');
+    if (!menu) return;
 
-    toggle.addEventListener('click', function() {
-      var expanded = toggle.getAttribute('aria-expanded') === 'true';
-      toggle.setAttribute('aria-expanded', String(!expanded));
-      if (expanded) {
-        menu.setAttribute('hidden', '');
-      } else {
-        menu.removeAttribute('hidden');
-      }
-    });
-  })();
+    const expanded = toggle.getAttribute('aria-expanded') === 'true';
+    toggle.setAttribute('aria-expanded', String(!expanded));
+    menu.toggleAttribute('hidden', expanded);
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    const toggle = document.getElementById('mobile-menu-toggle');
+    const menu = document.getElementById('mobile-menu');
+    if (!toggle || !menu || menu.hasAttribute('hidden')) return;
+
+    toggle.setAttribute('aria-expanded', 'false');
+    menu.setAttribute('hidden', '');
+    toggle.focus();
+  });
 </script>
