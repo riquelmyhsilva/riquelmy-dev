@@ -26,6 +26,8 @@
 :root {
   --header-height: 3.75rem;
   --scroll-margin-top: calc(var(--header-height) + 1.5rem);
+  --layout-gutter: clamp(1.5rem, 8vw, 10rem);
+  --layout-max-width: 1920px;
 }
 
 /* ============================================
@@ -290,11 +292,12 @@ html.light .astro-code span {
    ============================================ */
 
 .container-main {
-  max-width: 1100px;
+  width: 100%;
+  max-width: var(--layout-max-width);
   margin-left: auto;
   margin-right: auto;
-  padding-left: 1.5rem;
-  padding-right: 1.5rem;
+  padding-left: var(--layout-gutter);
+  padding-right: var(--layout-gutter);
 }
 
 .container-article {

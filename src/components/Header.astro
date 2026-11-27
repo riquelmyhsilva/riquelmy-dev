@@ -18,6 +18,7 @@ const navLinks = [
 const currentPath = Astro.url.pathname;
 ---
 
+<div class="header-spacer" aria-hidden="true"></div>
 <header class="header" id="site-header" transition:animate="none">
   <div class="header__inner">
     <a href={homeHref} class="header__logo" aria-label="Home">
@@ -64,39 +65,48 @@ const currentPath = Astro.url.pathname;
   </div>
 
   <nav class="mobile-menu" id="mobile-menu" aria-label="Mobile navigation" hidden>
-    <ul class="mobile-menu__links" role="list">
-      {navLinks.map(({ href, label }) => (
-        <li>
-          <a
-            href={href}
-            class:list={['mobile-menu__link', { 'mobile-menu__link--active': currentPath === href || (href !== '/' && href !== '/en' && currentPath.startsWith(href)) }]}
-          >
-            {label}
-          </a>
-        </li>
-      ))}
-    </ul>
+    <div class="mobile-menu__inner">
+      <ul class="mobile-menu__links" role="list">
+        {navLinks.map(({ href, label }) => (
+          <li>
+            <a
+              href={href}
+              class:list={['mobile-menu__link', { 'mobile-menu__link--active': currentPath === href || (href !== '/' && href !== '/en' && currentPath.startsWith(href)) }]}
+            >
+              {label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
   </nav>
 </header>
 
 <style>
+  .header-spacer {
+    height: var(--header-height, 3.75rem);
+  }
+
   .header {
-    position: sticky;
+    position: fixed;
     top: 0;
+    left: 0;
+    right: 0;
     z-index: 50;
     border-bottom: 1px solid var(--color-border);
     background-color: color-mix(in srgb, var(--color-bg) 85%, transparent);
-    backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
   }
 
   .header__inner {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    max-width: 1100px;
+    width: 100%;
+    max-width: var(--layout-max-width);
     margin: 0 auto;
-    padding: 0 1.5rem;
+    padding: 0 var(--layout-gutter);
     height: var(--header-height, 3.75rem);
   }
 
@@ -190,15 +200,58 @@ const currentPath = Astro.url.pathname;
   }
 
   .burger-line {
-    transition: transform 0.2s ease, opacity 0.2s ease;
-    transform-origin: center;
+    transition: transform 200ms cubic-bezier(0.23, 1, 0.32, 1), opacity 150ms ease;
   }
 
-  /* Mobile menu */
+  .burger-line--top {
+    transform-origin: 12px 6px;
+  }
+
+  .burger-line--mid {
+    transform-origin: 12px 12px;
+  }
+
+  .burger-line--bot {
+    transform-origin: 12px 18px;
+  }
+
+  .header__burger[aria-expanded="true"] .burger-line--top {
+    transform: translateY(6px) rotate(45deg);
+  }
+
+  .header__burger[aria-expanded="true"] .burger-line--mid {
+    opacity: 0;
+    transform: scaleX(0.5);
+  }
+
+  .header__burger[aria-expanded="true"] .burger-line--bot {
+    transform: translateY(-6px) rotate(-45deg);
+  }
+
+  /* Mobile menu — expands inside the single frosted-glass header surface */
   .mobile-menu {
-    border-bottom: 1px solid var(--color-border);
-    padding: 0.75rem 1.5rem 1rem;
-    background-color: var(--color-bg);
+    display: grid;
+    grid-template-rows: 1fr;
+    transition:
+      grid-template-rows 240ms cubic-bezier(0.23, 1, 0.32, 1),
+      display 240ms;
+    transition-behavior: allow-discrete;
+  }
+
+  .mobile-menu__inner {
+    overflow: hidden;
+    padding: 0 var(--layout-gutter);
+  }
+
+  @starting-style {
+    .mobile-menu {
+      grid-template-rows: 0fr;
+    }
+  }
+
+  .mobile-menu:where([hidden], [data-closing]) {
+    grid-template-rows: 0fr;
+    transition-duration: 180ms;
   }
 
   .mobile-menu[hidden] {
@@ -211,13 +264,39 @@ const currentPath = Astro.url.pathname;
     }
   }
 
+  @media (prefers-reduced-motion: reduce) {
+    .burger-line {
+      transition: opacity 120ms ease;
+    }
+
+    .mobile-menu {
+      grid-template-rows: 1fr;
+      opacity: 1;
+      transition: opacity 100ms ease, display 100ms;
+      transition-behavior: allow-discrete;
+    }
+
+    @starting-style {
+      .mobile-menu {
+        grid-template-rows: 1fr;
+        opacity: 0;
+      }
+    }
+
+    .mobile-menu:where([hidden], [data-closing]) {
+      grid-template-rows: 1fr;
+      opacity: 0;
+      transition-duration: 100ms;
+    }
+  }
+
   .mobile-menu__links {
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
     list-style: none;
     margin: 0;
-    padding: 0;
+    padding: 0.75rem 0 1rem;
   }
 
   .mobile-menu__link {
@@ -244,18 +323,114 @@ const currentPath = Astro.url.pathname;
 
 <script is:inline>
   (function() {
-    var toggle = document.getElementById('mobile-menu-toggle');
-    var menu = document.getElementById('mobile-menu');
-    if (!toggle || !menu) return;
+    if (window.__mobileMenuBound) return;
+    window.__mobileMenuBound = true;
 
-    toggle.addEventListener('click', function() {
-      var expanded = toggle.getAttribute('aria-expanded') === 'true';
-      toggle.setAttribute('aria-expanded', String(!expanded));
-      if (expanded) {
-        menu.setAttribute('hidden', '');
-      } else {
-        menu.removeAttribute('hidden');
+    var supportsDisplayTransition;
+    function canTransitionDisplay() {
+      if (supportsDisplayTransition !== undefined) return supportsDisplayTransition;
+      if (!window.CSS || typeof window.CSS.supports !== 'function' || !window.CSS.supports('transition-behavior', 'allow-discrete') || !document.body) {
+        supportsDisplayTransition = false;
+        return false;
       }
+      var probe = document.createElement('div');
+      probe.style.cssText = 'transition: display 1s allow-discrete !important; display: block;';
+      document.body.appendChild(probe);
+      getComputedStyle(probe).display;
+      probe.style.display = 'none';
+      supportsDisplayTransition = getComputedStyle(probe).display === 'block';
+      probe.remove();
+      return supportsDisplayTransition;
+    }
+
+    function getElements() {
+      return {
+        toggle: document.getElementById('mobile-menu-toggle'),
+        menu: document.getElementById('mobile-menu'),
+        header: document.getElementById('site-header')
+      };
+    }
+
+    function setOpen(open, instant) {
+      var els = getElements();
+      if (!els.toggle || !els.menu) return;
+      els.toggle.setAttribute('aria-expanded', String(open));
+
+      if (open) {
+        els.menu.removeAttribute('data-closing');
+        els.menu.hidden = false;
+        return;
+      }
+
+      if (instant || (els.menu.hidden && !els.menu.hasAttribute('data-closing'))) {
+        els.menu.removeAttribute('data-closing');
+        els.menu.hidden = true;
+        return;
+      }
+
+      if (canTransitionDisplay()) {
+        els.menu.hidden = true;
+        return;
+      }
+
+      els.menu.setAttribute('data-closing', '');
+      var animations = typeof els.menu.getAnimations === 'function' ? els.menu.getAnimations() : [];
+      if (animations.length === 0) {
+        els.menu.removeAttribute('data-closing');
+        els.menu.hidden = true;
+        return;
+      }
+
+      Promise.race([
+        Promise.allSettled(animations.map(function(a) { return a.finished; })),
+        new Promise(function(resolve) { window.setTimeout(resolve, 250); })
+      ]).then(function() {
+        if (els.menu.hasAttribute('data-closing')) {
+          els.menu.removeAttribute('data-closing');
+          els.menu.hidden = true;
+        }
+      });
+    }
+
+    document.addEventListener('click', function(e) {
+      var target = e.target;
+      if (!(target instanceof Element)) return;
+
+      var els = getElements();
+      if (!els.toggle || !els.menu) return;
+
+      if (target.closest('#mobile-menu-toggle')) {
+        var expanded = els.toggle.getAttribute('aria-expanded') === 'true';
+        setOpen(!expanded);
+        return;
+      }
+
+      if (target.closest('.mobile-menu__link')) {
+        setOpen(false, true);
+        return;
+      }
+
+      if (
+        els.toggle.getAttribute('aria-expanded') === 'true' &&
+        els.header &&
+        !els.header.contains(target) &&
+        !els.menu.contains(target)
+      ) {
+        setOpen(false);
+      }
+    });
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key !== 'Escape') return;
+      var els = getElements();
+      if (els.toggle && els.toggle.getAttribute('aria-expanded') === 'true') {
+        setOpen(false);
+        els.toggle.focus();
+      }
+    });
+
+    document.addEventListener('astro:before-swap', function() {
+      setOpen(false, true);
     });
   })();
 </script>
