@@ -1,0 +1,35 @@
+---
+title: "Order Support Triage Agent"
+description: "Production-oriented order support triage microservice built with FastAPI, Google Gemini API, RAG over business policies, Tool Calling, multi-turn session memory, deterministic Guardrails, interactive Chat UI, and automated pytest Evals + GitHub Actions CI."
+stack: ["Python", "FastAPI", "Gemini API", "RAG", "Guardrails", "pytest", "Docker"]
+githubUrl: "https://github.com/riquelmyhsilva/order-support-agent"
+featured: true
+---
+
+## Overview & Problem
+
+Order support workflows require balancing real-time transactional lookups with strict adherence to business policies. Relying solely on open-ended LLM prompts risks policy hallucinations, out-of-scope actions, or lost context across multi-turn conversations.
+
+This project implements a production-oriented order support triage microservice that combines **RAG (Retrieval-Augmented Generation)** over business policies, structured **Tool Calling**, and **deterministic Guardrails** to deliver auditable, policy-compliant support responses.
+
+## Architecture & Solution
+
+The service is designed as a modular **FastAPI** application powered by the **Google Gemini API**, structured around five core pillars:
+
+- **RAG over Business Policies**: retrieves relevant return, refund, cancellation, and shipping rules before generating answers.
+- **Tool Calling & Multi-Turn Memory**: invokes structured tools for order lookups while preserving session context across conversation turns.
+- **Deterministic Guardrails**: validates inputs and outputs to prevent out-of-policy behavior and enforce safety constraints.
+- **Interactive Chat UI & AI Inspector**: provides a web interface to test conversations and inspect retrieved policy chunks, tool calls, and agent decisions in real time.
+- **Automated Evaluation Suite**: runs `pytest`-based behavioral evals integrated into **GitHub Actions CI** to catch regressions on every change.
+
+## Tech Stack & Technical Decisions
+
+- **Python & FastAPI**: typed, low-latency endpoints for serving the triage workflow and web interface.
+- **Google Gemini API**: powers multi-turn reasoning, grounded generation, and native *Tool Calling*.
+- **RAG & Guardrails**: clean separation between evolving policy knowledge (retrieved via RAG) and hard safety boundaries (enforced via deterministic Guardrails).
+- **pytest + GitHub Actions + Docker**: reproducible containerized execution and continuous quality gates in CI.
+
+## Results & Key Takeaways
+
+- Demonstrates an end-to-end **AI Engineering** workflow that goes beyond a basic chat prototype by incorporating observability (*AI Inspector*), deterministic guardrails, and automated CI evaluations.
+- Provides an extensible foundation for adding new order management tools, expanding policy documents, and scaling evaluation datasets.

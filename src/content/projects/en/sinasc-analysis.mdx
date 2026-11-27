@@ -1,0 +1,31 @@
+---
+title: "SINASC Data Analysis"
+description: "Exploratory data analysis and pipeline on Brazilian public birth records (SINASC) focused on data cleaning, modeling, and indicator visualization."
+stack: ["Python", "Pandas", "Data Analysis", "Jupyter"]
+githubUrl: "https://github.com/riquelmyhsilva/sinasc-project"
+featured: false
+---
+
+## Overview & Problem
+
+Public healthcare datasets such as Brazil's **SINASC (Live Birth Information System)** hold valuable insights into demographic and maternal-infant health indicators, but raw records often involve inconsistent data types, missing values, and complex categorical encodings.
+
+This project builds a data cleaning and **Exploratory Data Analysis (EDA)** pipeline over SINASC records, turning raw public datasets into structured indicators and clear visual analyses.
+
+## Architecture & Solution
+
+The analytical workflow is structured into reproducible notebook stages:
+
+- **Ingestion & Data Cleaning**: loads raw records, handles missing values, standardizes categorical codes, and enforces consistent data types.
+- **Feature Engineering & Aggregation**: derives analytical variables and groups records across temporal and regional dimensions to compute maternal and neonatal indicators.
+- **Exploratory Analysis & Visualization**: produces summary tables and charts to inspect distributions, trends, and relationships across demographic and clinical variables.
+
+## Tech Stack & Technical Decisions
+
+- **Python & Pandas**: vectorized tabular data manipulation, grouping/pivoting (`groupby`, `pivot_table`), and clean handling of categorical and time-based attributes.
+- **Jupyter Notebooks**: combines code, cleaning assumptions, and visual interpretations in a transparent, step-by-step analytical narrative.
+
+## Results & Key Takeaways
+
+- Provides a clean, repeatable workflow for preparing Brazilian public health microdata for statistical analysis.
+- Highlights practical data wrangling and visual storytelling techniques for real-world tabular datasets.

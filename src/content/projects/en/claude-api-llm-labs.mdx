@@ -1,0 +1,33 @@
+---
+title: "Claude API & LLM Engineering Labs"
+description: "Hands-on LLM engineering labs covering Tool Use, structured output control, chunking, embeddings, and automated prompt evals."
+stack: ["Python", "Claude API", "Prompt Evals", "Embeddings", "Tool Use"]
+githubUrl: "https://github.com/riquelmyhsilva/building-with-claude-api-course"
+featured: false
+---
+
+## Overview & Problem
+
+Building reliable applications with Large Language Models (LLMs) requires engineering patterns that go far beyond basic text completion: production systems depend on predictable output schemas, safe external function execution, effective context retrieval, and systematic prompt evaluation.
+
+This repository collects hands-on **LLM Engineering** labs and experiments built with the **Claude API**, exploring the core building blocks of production AI systems.
+
+## Architecture & Solution
+
+The labs are organized into focused modules covering essential LLM engineering patterns:
+
+- **Structured Output Control**: techniques for enforcing strict response formats (such as validated JSON) for reliable downstream integration.
+- **Tool Use (Function Calling)**: defining tool schemas and orchestrating multi-step execution loops between the model and external Python functions.
+- **Chunking & Embeddings**: document partitioning strategies and vector representations for semantic search and RAG pipelines.
+- **Automated Prompt Evals**: building test suites and grading criteria (code-based and model-based) to measure prompt quality, consistency, and regressions.
+
+## Tech Stack & Technical Decisions
+
+- **Python & Claude API**: direct integration with the official SDK to explore system prompts, response prefilling, generation parameters, and native *Tool Use*.
+- **Prompt Evals**: treats prompt engineering as an empirical discipline backed by repeatable test suites rather than ad-hoc trial and error.
+- **Modular Notebooks & Scripts**: self-contained labs that serve as a practical reference catalog for new AI projects.
+
+## Results & Key Takeaways
+
+- Establishes a reusable toolkit of patterns for agent workflows, structured data extraction, and retrieval pipelines.
+- Reinforces an evaluation-first workflow for iterating on prompts with measurable quality criteria.

@@ -1,0 +1,53 @@
+---
+import ProjectLayout from '@layouts/ProjectLayout.astro';
+import { getCollection, render } from 'astro:content';
+import { getLocalizedReadingTime } from '../../../i18n/utils';
+
+export async function getStaticPaths() {
+  const projects = await getCollection('projects', ({ id }) => id.startsWith('en/'));
+  const sorted = projects.sort((a, b) => {
+    if (a.data.featured && !b.data.featured) return -1;
+    if (!a.data.featured && b.data.featured) return 1;
+    return a.data.title.localeCompare(b.data.title);
+  });
+
+  return sorted.map((project, index) => {
+    const cleanSlug = project.id.replace(/^en\//, '');
+    return {
+      params: { slug: cleanSlug },
+      props: {
+        project,
+        prevProject: index > 0
+          ? { slug: sorted[index - 1].id.replace(/^en\//, ''), title: sorted[index - 1].data.title }
+          : null,
+        nextProject: index < sorted.length - 1
+          ? { slug: sorted[index + 1].id.replace(/^en\//, ''), title: sorted[index + 1].data.title }
+          : null,
+      },
+    };
+  });
+}
+
+const { project, prevProject, nextProject } = Astro.props;
+const { Content, headings } = await render(project);
+const readingTime = project.body ? getLocalizedReadingTime(project.body, 'en') : undefined;
+---
+
+<ProjectLayout
+  title={project.data.title}
+  description={project.data.description}
+  stack={project.data.stack}
+  githubUrl={project.data.githubUrl}
+  liveUrl={project.data.liveUrl}
+  featured={project.data.featured}
+  date={project.data.date}
+  status={project.data.status}
+  role={project.data.role}
+  readingTime={readingTime}
+  headings={headings}
+  prevProject={prevProject}
+  nextProject={nextProject}
+  lang="en"
+>
+  <Content />
+</ProjectLayout>

@@ -1,0 +1,33 @@
+---
+title: "BERT Fine-Tuning — Análise de Sentimentos IMDB"
+description: "Pipeline de Processamento de Linguagem Natural com fine-tuning de modelo Transformer (BERT) para classificação de sentimentos no dataset IMDB, com avaliação de métricas e inferência."
+stack: ["Python", "BERT", "Transformers", "NLP", "PyTorch", "Hugging Face"]
+githubUrl: "https://github.com/riquelmyhsilva/bert-fine-tuning-imdb-dataset"
+featured: true
+---
+
+## Visão Geral & Problema
+
+A classificação de sentimentos em resenhas longas de filmes exige capturar nuances semânticas, ironia e dependências de longo alcance no texto — cenários em que abordagens clássicas baseadas em *bag-of-words* apresentam limitações.
+
+Este projeto implementa um pipeline ponta a ponta de **Processamento de Linguagem Natural (NLP)** com *fine-tuning* de um modelo **Transformer (BERT)** sobre o dataset **IMDB**, cobrindo desde a preparação e tokenização dos dados até a avaliação de métricas e inferência.
+
+## Arquitetura & Solução
+
+O fluxo de trabalho foi estruturado nas seguintes etapas:
+
+- **Preparação e Tokenização**: carregamento do dataset IMDB, limpeza textual e tokenização compatível com a arquitetura BERT (incluindo *padding*, *truncation* e máscaras de atenção).
+- **Fine-Tuning Supervisionado**: adaptação dos pesos do modelo pré-treinado para a tarefa de classificação binária de sentimentos utilizando **PyTorch** e o ecossistema **Hugging Face**.
+- **Avaliação de Métricas**: acompanhamento de perda (*loss*) e métricas de classificação no conjunto de validação/teste para verificar a capacidade de generalização.
+- **Pipeline de Inferência**: interface prática para testar predições de sentimento em novos textos fora da amostra de treino.
+
+## Stack & Decisões Técnicas
+
+- **Python & PyTorch**: controle sobre o loop de treinamento, uso de aceleração por hardware (GPU) e manipulação eficiente de tensores.
+- **BERT & Hugging Face Transformers**: aproveitamento de representações bidirecionais pré-treinadas (*transfer learning*) para alcançar alta qualidade semântica com custo de treinamento reduzido.
+- **Boas Práticas de Experimentação**: organização modular do código para facilitar ajustes de hiperparâmetros (taxa de aprendizado, *batch size*, número de épocas e comprimento máximo de sequência).
+
+## Resultados & Aprendizados
+
+- Consolidação do fluxo completo de *transfer learning* em NLP moderno com arquiteturas baseadas em *Self-Attention*.
+- Base reutilizável para tarefas correlatas de classificação de texto, triagem automática de feedbacks e análise de opinião em português ou inglês.

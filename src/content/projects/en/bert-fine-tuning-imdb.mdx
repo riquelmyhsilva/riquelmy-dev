@@ -1,0 +1,33 @@
+---
+title: "BERT Fine-Tuning — IMDB Sentiment Analysis"
+description: "NLP pipeline featuring Transformer (BERT) fine-tuning for sentiment classification on the IMDB dataset, including evaluation metrics and inference."
+stack: ["Python", "BERT", "Transformers", "NLP", "PyTorch", "Hugging Face"]
+githubUrl: "https://github.com/riquelmyhsilva/bert-fine-tuning-imdb-dataset"
+featured: true
+---
+
+## Overview & Problem
+
+Sentiment classification on full-length movie reviews requires capturing semantic nuance, negation, and long-range context — areas where traditional *bag-of-words* models often fall short.
+
+This project implements an end-to-end **Natural Language Processing (NLP)** pipeline that fine-tunes a **Transformer (BERT)** model on the **IMDB** dataset, covering data preparation, tokenization, supervised fine-tuning, metric evaluation, and inference.
+
+## Architecture & Solution
+
+The pipeline is organized into four main stages:
+
+- **Data Preparation & Tokenization**: loads the IMDB dataset, cleans raw review text, and applies BERT-compatible tokenization (including padding, truncation, and attention masks).
+- **Supervised Fine-Tuning**: adapts pre-trained BERT weights for binary sentiment classification using **PyTorch** and the **Hugging Face** ecosystem.
+- **Metric Evaluation**: tracks training/validation loss and classification metrics on held-out test splits to assess generalization.
+- **Inference Pipeline**: exposes a clean workflow to run sentiment predictions on custom, unseen review texts.
+
+## Tech Stack & Technical Decisions
+
+- **Python & PyTorch**: granular control over the training loop, tensor operations, and hardware acceleration (GPU).
+- **BERT & Hugging Face Transformers**: leverages bidirectional pre-trained representations (*transfer learning*) to achieve strong semantic understanding with practical training budgets.
+- **Modular Experiment Structure**: structured to make hyperparameter tuning (learning rate, batch size, epochs, and maximum sequence length) straightforward and reproducible.
+
+## Results & Key Takeaways
+
+- Demonstrates the complete *transfer learning* lifecycle for modern NLP using *Self-Attention* architectures.
+- Serves as a reusable blueprint for text classification, automated feedback triage, and opinion mining tasks.

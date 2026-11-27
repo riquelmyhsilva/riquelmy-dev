@@ -8,6 +8,9 @@ import tailwindcss from '@tailwindcss/vite';
 export default defineConfig({
   site: 'https://riquelmy.dev',
   output: 'static',
+  prefetch: {
+    prefetchAll: true,
+  },
   i18n: {
     defaultLocale: 'pt',
     locales: ['pt', 'en'],
@@ -15,7 +18,15 @@ export default defineConfig({
       prefixDefaultLocale: false,
     },
   },
-  integrations: [mdx(), sitemap()],
+  integrations: [
+    mdx(),
+    sitemap({
+      filter: (page) => {
+        const pathname = new URL(page).pathname;
+        return pathname !== '/links' && pathname !== '/links/';
+      },
+    }),
+  ],
   vite: {
     plugins: [tailwindcss()],
   },

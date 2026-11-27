@@ -1,0 +1,31 @@
+---
+title: "Análise de Dados SINASC"
+description: "Análise exploratória e pipeline de dados públicos de nascimentos no Brasil (SINASC) com foco em limpeza, modelagem e visualização de indicadores."
+stack: ["Python", "Pandas", "Data Analysis", "Jupyter"]
+githubUrl: "https://github.com/riquelmyhsilva/sinasc-project"
+featured: false
+---
+
+## Visão Geral & Problema
+
+Dados públicos de saúde, como os registros do **SINASC (Sistema de Informações sobre Nascidos Vivos)**, possuem alto valor para a compreensão de indicadores demográficos e materno-infantis no Brasil, mas frequentemente apresentam desafios de padronização, valores ausentes e tipagem inconsistente.
+
+Este projeto desenvolve um pipeline de limpeza, transformação e **Análise Exploratória de Dados (EDA)** sobre bases do SINASC, transformando registros brutos em indicadores claros e visualizações analíticas.
+
+## Arquitetura & Solução
+
+O trabalho analítico foi estruturado em etapas progressivas dentro de notebooks reprodutíveis:
+
+- **Ingestão e Saneamento**: leitura das bases brutas, tratamento de valores nulos, padronização de categorias e conversão adequada de tipos de dados.
+- **Engenharia de Atributos e Agregações**: criação de variáveis derivadas e agrupamentos temporais/regionais para cálculo de indicadores de saúde materno-infantil.
+- **Análise Exploratória & Visualização**: geração de gráficos e tabelas resumo para investigar distribuições, tendências e correlações entre variáveis clínicas e demográficas.
+
+## Stack & Decisões Técnicas
+
+- **Python & Pandas**: manipulação tabular vetorizada, agregações complexas (`groupby`, `pivot_table`) e tratamento eficiente de séries temporais e variáveis categóricas.
+- **Jupyter Notebooks**: documentação narrativa intercalando código, premissas de limpeza e interpretação visual dos indicadores.
+
+## Resultados & Aprendizados
+
+- Estruturação de um fluxo claro de preparação de dados públicos brasileiros para análise estatística e geração de *insights*.
+- Demonstração prática de boas práticas de saneamento de dados e comunicação visual de resultados analíticos.

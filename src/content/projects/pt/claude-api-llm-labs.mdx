@@ -1,0 +1,33 @@
+---
+title: "Labs de LLM Engineering & Claude API"
+description: "Experimentos práticos de engenharia com LLMs cobrindo Tool Use, controle de saída estruturada, chunking, embeddings e prompt evals automatizadas."
+stack: ["Python", "Claude API", "Prompt Evals", "Embeddings", "Tool Use"]
+githubUrl: "https://github.com/riquelmyhsilva/building-with-claude-api-course"
+featured: false
+---
+
+## Visão Geral & Problema
+
+Construir aplicações confiáveis com Grandes Modelos de Linguagem (LLMs) exige dominar padrões de engenharia que vão muito além de chamadas simples de texto: é preciso garantir formato de saída previsível, integração segura com funções externas, recuperação eficiente de contexto e avaliação sistemática de prompts.
+
+Este repositório reúne laboratórios práticos e experimentos focados em **LLM Engineering** utilizando a **Claude API**, explorando os blocos fundamentais de sistemas de IA em produção.
+
+## Arquitetura & Solução
+
+Os experimentos estão organizados em módulos independentes que abordam padrões essenciais de engenharia com LLMs:
+
+- **Controle de Saída Estruturada**: técnicas para garantir respostas em formatos estritos (como JSON validado), facilitando a integração com sistemas downstream.
+- **Tool Use (Function Calling)**: definição de esquemas de ferramentas e orquestração do ciclo de decisão entre o modelo e funções Python externas.
+- **Chunking & Embeddings**: estratégias de particionamento de documentos e geração de representações vetoriais para fluxos de busca semântica e RAG.
+- **Prompt Evals Automatizadas**: criação de casos de teste e critérios objetivos/baseados em modelo para medir qualidade, consistência e regressões em prompts.
+
+## Stack & Decisões Técnicas
+
+- **Python & Claude API**: utilização direta do SDK oficial para explorar parâmetros avançados de geração, *system prompts*, *prefilling* e *Tool Use*.
+- **Prompt Evals**: adoção de avaliações orientadas a dados desde a fase de experimentação, evitando ajustes puramente subjetivos de prompt.
+- **Modularidade**: notebooks e scripts desacoplados por tema, servindo como catálogo de referência rápida para novos projetos de IA.
+
+## Resultados & Aprendizados
+
+- Repertório prático de padrões reutilizáveis para agentes, pipelines de extração estruturada e sistemas de recuperação de informação.
+- Metodologia estruturada para iterar em prompts com base em métricas de avaliação reproduzíveis.

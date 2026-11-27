@@ -1,6 +1,7 @@
 ---
 import Header from '@components/Header.astro';
 import Footer from '@components/Footer.astro';
+import { ClientRouter, fade } from 'astro:transitions';
 import '@styles/global.css';
 import { getLangFromUrl, getLocalizedPath, type Language } from '../i18n/utils';
 
@@ -9,15 +10,24 @@ interface Props {
   description: string;
   ogImage?: string;
   lang?: Language;
+  noindex?: boolean;
+  minimal?: boolean;
 }
 
-const { title, description, ogImage = '/og-default.png', lang: explicitLang } = Astro.props;
+const {
+  title,
+  description,
+  ogImage = '/og-default.png',
+  lang: explicitLang,
+  noindex = false,
+  minimal = false,
+} = Astro.props;
 const lang = explicitLang ?? getLangFromUrl(Astro.url);
 const htmlLang = lang === 'pt' ? 'pt-BR' : 'en';
-const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const canonicalURL = !noindex ? new URL(Astro.url.pathname, Astro.site) : undefined;
 const rssHref = lang === 'en' ? '/en/rss.xml' : '/rss.xml';
-const ptAlternateURL = new URL(getLocalizedPath(Astro.url.pathname, 'pt'), Astro.site);
-const enAlternateURL = new URL(getLocalizedPath(Astro.url.pathname, 'en'), Astro.site);
+const ptAlternateURL = !noindex ? new URL(getLocalizedPath(Astro.url.pathname, 'pt'), Astro.site) : undefined;
+const enAlternateURL = !noindex ? new URL(getLocalizedPath(Astro.url.pathname, 'en'), Astro.site) : undefined;
 ---
 
 <!doctype html>
@@ -28,28 +38,38 @@ const enAlternateURL = new URL(getLocalizedPath(Astro.url.pathname, 'en'), Astro
     <meta name="generator" content={Astro.generator} />
 
     <title>{title}</title>
+    {!minimal && <ClientRouter />}
     <meta name="description" content={description} />
 
-    <link rel="canonical" href={canonicalURL} />
-    <link rel="alternate" hreflang="pt-BR" href={ptAlternateURL} />
-    <link rel="alternate" hreflang="en" href={enAlternateURL} />
-    <link rel="alternate" hreflang="x-default" href={ptAlternateURL} />
+    {noindex ? (
+      <>
+        <meta name="robots" content="noindex, nofollow" />
+        <meta name="googlebot" content="noindex, nofollow" />
+      </>
+    ) : (
+      <>
+        <link rel="canonical" href={canonicalURL} />
+        <link rel="alternate" hreflang="pt-BR" href={ptAlternateURL} />
+        <link rel="alternate" hreflang="en" href={enAlternateURL} />
+        <link rel="alternate" hreflang="x-default" href={ptAlternateURL} />
 
-    <!-- Open Graph -->
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content={canonicalURL} />
-    <meta property="og:title" content={title} />
-    <meta property="og:description" content={description} />
-    <meta property="og:image" content={new URL(ogImage, Astro.site)} />
+        <!-- Open Graph -->
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={canonicalURL} />
+        <meta property="og:title" content={title} />
+        <meta property="og:description" content={description} />
+        <meta property="og:image" content={new URL(ogImage, Astro.site)} />
 
-    <!-- Twitter -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content={title} />
-    <meta name="twitter:description" content={description} />
-    <meta name="twitter:image" content={new URL(ogImage, Astro.site)} />
+        <!-- Twitter -->
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={title} />
+        <meta name="twitter:description" content={description} />
+        <meta name="twitter:image" content={new URL(ogImage, Astro.site)} />
 
-    <!-- RSS -->
-    <link rel="alternate" type="application/rss+xml" title="RSS Feed" href={rssHref} />
+        <!-- RSS -->
+        <link rel="alternate" type="application/rss+xml" title="RSS Feed" href={rssHref} />
+      </>
+    )}
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -65,24 +85,34 @@ const enAlternateURL = new URL(getLocalizedPath(Astro.url.pathname, 'en'), Astro
     <!-- Theme Initialization (prevents FOUC) -->
     <script is:inline>
       (function() {
-        const STORAGE_KEY = 'theme';
-        const stored = localStorage.getItem(STORAGE_KEY);
-        const theme = (stored === 'light' || stored === 'dark')
-          ? stored
-          : (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
-        if (theme === 'light') {
-          document.documentElement.classList.add('light');
+        function applyTheme() {
+          const STORAGE_KEY = 'theme';
+          const stored = localStorage.getItem(STORAGE_KEY);
+          const theme = (stored === 'light' || stored === 'dark')
+            ? stored
+            : (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+          document.documentElement.classList.toggle('light', theme === 'light');
         }
+        applyTheme();
+        document.addEventListener('astro:after-swap', applyTheme);
       })();
     </script>
 
     <slot name="head" />
   </head>
   <body>
-    <Header />
-    <main id="main-content">
-      <slot />
-    </main>
-    <Footer />
+    {minimal ? (
+      <main id="main-content">
+        <slot />
+      </main>
+    ) : (
+      <>
+        <Header />
+        <main id="main-content" transition:animate={fade({ duration: '0.45s' })}>
+          <slot />
+        </main>
+        <Footer />
+      </>
+    )}
   </body>
 </html>

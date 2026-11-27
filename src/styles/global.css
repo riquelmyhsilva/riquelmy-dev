@@ -9,16 +9,16 @@
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "Fira Code", monospace;
 
-  --color-bg: #0f0f0f;
-  --color-surface: #1a1a1a;
-  --color-surface-hover: #222222;
-  --color-border: #2a2a2a;
-  --color-text: #e5e5e5;
-  --color-text-muted: #888888;
-  --color-accent: #5b9a8b;
-  --color-accent-hover: #6db3a3;
-  --color-accent-muted: #3d6b60;
-  --color-code-bg: #161616;
+  --color-bg: #0b0b0c;
+  --color-surface: #141416;
+  --color-surface-hover: #1c1c1f;
+  --color-border: #26262a;
+  --color-text: #f5f5f5;
+  --color-text-muted: #9ca3af;
+  --color-accent: #ff8000;
+  --color-accent-hover: #ff9933;
+  --color-accent-muted: #663300;
+  --color-code-bg: #111113;
   --color-tag-bg: #1f2937;
   --color-tag-text: #9ca3af;
 }
@@ -34,6 +34,7 @@
 
 html {
   scroll-behavior: smooth;
+  scrollbar-gutter: stable;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -58,9 +59,9 @@ html.light {
   --color-border: #e5e5e5;
   --color-text: #1a1a1a;
   --color-text-muted: #666666;
-  --color-accent: #4a8a7b;
-  --color-accent-hover: #3d7568;
-  --color-accent-muted: #b8d8cf;
+  --color-accent: #e06d00;
+  --color-accent-hover: #b85800;
+  --color-accent-muted: #ffe0bd;
   --color-code-bg: #f6f8fa;
   --color-tag-bg: #e5e7eb;
   --color-tag-text: #4b5563;

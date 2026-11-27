@@ -6,6 +6,10 @@ const t = useTranslations('en');
 
 const skills = [
   {
+    category: t('about.skills.ai'),
+    items: ['LLMs (Gemini, Claude)', 'RAG', 'Tool Calling', 'Guardrails', 'Automated Evals (pytest)', 'Transformers / BERT', 'FastAPI', 'Hugging Face'],
+  },
+  {
     category: t('about.skills.ds'),
     items: ['Python', 'scikit-learn', 'XGBoost', 'pandas', 'NumPy', 'TensorFlow', 'statsmodels'],
   },
@@ -52,6 +56,7 @@ const skills = [
           <li>{t('about.focus2')}</li>
           <li>{t('about.focus3')}</li>
           <li>{t('about.focus4')}</li>
+          <li>{t('about.focus5')}</li>
         </ul>
       </div>
 
@@ -74,8 +79,8 @@ const skills = [
       <div class="about-page__section">
         <h2 class="about-page__subtitle">{t('about.contactTitle')}</h2>
         <p>
-          {t('about.contactP1')} <a href="https://github.com" target="_blank" rel="noopener noreferrer">GitHub</a>
-          {t('about.contactP2')} <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer">LinkedIn</a>{t('about.contactP3')} <a href="/en/rss.xml">RSS feed</a> {t('about.contactP4')}
+          {t('about.contactP1')} <a href="https://github.com/riquelmyhsilva" target="_blank" rel="noopener noreferrer">GitHub</a>
+          {t('about.contactP2')} <a href="https://www.linkedin.com/in/riquelmyhsilva/" target="_blank" rel="noopener noreferrer">LinkedIn</a>{t('about.contactP3')} <a href="/en/rss.xml">RSS feed</a> {t('about.contactP4')}
         </p>
       </div>
     </div>
@@ -84,7 +89,8 @@ const skills = [
 
 <style>
   .about-page {
-    padding: 3rem 0 2rem;
+    padding-top: 3rem;
+    padding-bottom: 2rem;
   }
 
   .about-page__header {

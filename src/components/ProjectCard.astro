@@ -5,38 +5,60 @@ interface Props {
   title: string;
   description: string;
   stack: string[];
+  slug?: string;
   githubUrl?: string;
   liveUrl?: string;
   lang?: Language;
 }
 
-const { title, description, stack, githubUrl, liveUrl, lang: explicitLang } = Astro.props;
+const { title, description, stack, slug, githubUrl, liveUrl, lang: explicitLang } = Astro.props;
 const lang = explicitLang ?? getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
+const cleanSlug = slug ? slug.replace(/^(pt|en)\//, '') : undefined;
+const projectHref = cleanSlug
+  ? (lang === 'en' ? `/en/projects/${cleanSlug}` : `/projects/${cleanSlug}`)
+  : undefined;
 ---
 
 <article class="project-card">
-  <h3 class="project-card__title">{title}</h3>
+  <h3 class="project-card__title">
+    {projectHref ? (
+      <a href={projectHref} class="project-card__main-link card-link">
+        {title}
+      </a>
+    ) : (
+      title
+    )}
+  </h3>
   <p class="project-card__desc">{description}</p>
   <div class="project-card__stack">
     {stack.map((tech) => (
       <span class="project-card__tech">{tech}</span>
     ))}
   </div>
-  <div class="project-card__links">
-    {githubUrl && (
-      <a href={githubUrl} class="project-card__link" target="_blank" rel="noopener noreferrer">
-        <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.387.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.387-1.333-1.756-1.333-1.756-1.09-.745.083-.729.083-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.31.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.3 1.23A11.51 11.51 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.29-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222 0 1.606-.015 2.896-.015 3.286 0 .322.218.694.825.576C20.565 21.795 24 17.298 24 12c0-6.63-5.37-12-12-12z"/></svg>
-        {t('projects.source')}
-      </a>
+  <footer class="project-card__links">
+    <div class="project-card__external-links">
+      {githubUrl && (
+        <a href={githubUrl} class="project-card__link" target="_blank" rel="noopener noreferrer">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.387.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.387-1.333-1.756-1.333-1.756-1.09-.745.083-.729.083-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.31.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.3 1.23A11.51 11.51 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.29-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222 0 1.606-.015 2.896-.015 3.286 0 .322.218.694.825.576C20.565 21.795 24 17.298 24 12c0-6.63-5.37-12-12-12z"/></svg>
+          {t('projects.source')}
+          <span class="visually-hidden"> ({title})</span>
+        </a>
+      )}
+      {liveUrl && (
+        <a href={liveUrl} class="project-card__link" target="_blank" rel="noopener noreferrer">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" aria-hidden="true"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          {t('projects.live')}
+          <span class="visually-hidden"> ({title})</span>
+        </a>
+      )}
+    </div>
+    {projectHref && (
+      <span class="project-card__details-hint" aria-hidden="true">
+        {t('projects.viewDetails')} →
+      </span>
     )}
-    {liveUrl && (
-      <a href={liveUrl} class="project-card__link" target="_blank" rel="noopener noreferrer">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" aria-hidden="true"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-        {t('projects.live')}
-      </a>
-    )}
-  </div>
+  </footer>
 </article>
 
 <style>
@@ -51,10 +73,49 @@ const t = useTranslations(lang);
     transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
   }
 
-  .project-card:hover {
+  .project-card:has(a.card-link) {
+    position: relative;
+  }
+
+  .project-card a.card-link {
+    color: inherit;
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+
+  .project-card a.card-link::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+  }
+
+  .project-card a.card-link:focus-visible {
+    outline: none;
+  }
+
+  .project-card:has(a.card-link:focus-visible) {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+    border-color: var(--color-accent-muted);
+  }
+
+  .project-card:hover,
+  .project-card:has(a.card-link:hover) {
     border-color: var(--color-accent-muted);
     box-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.2);
     transform: translateY(-2px);
+  }
+
+  .project-card:has(a.card-link:hover) .project-card__title a.card-link {
+    color: var(--color-accent);
+  }
+
+  /* Keep independent links above the stretched card overlay */
+  .project-card:has(a.card-link) a:not(.card-link),
+  .project-card:has(a.card-link) button {
+    position: relative;
+    z-index: 1;
   }
 
   .project-card__title {
@@ -90,8 +151,15 @@ const t = useTranslations(lang);
 
   .project-card__links {
     display: flex;
+    align-items: center;
+    justify-content: space-between;
     gap: 1rem;
     padding-top: 0.25rem;
+  }
+
+  .project-card__external-links {
+    display: flex;
+    gap: 1rem;
   }
 
   .project-card__link {
@@ -107,5 +175,29 @@ const t = useTranslations(lang);
 
   .project-card__link:hover {
     color: var(--color-accent-hover);
+  }
+
+  .project-card__details-hint {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    transition: color 0.15s ease, transform 0.15s ease;
+  }
+
+  .project-card:has(a.card-link:hover) .project-card__details-hint {
+    color: var(--color-accent);
+    transform: translateX(2px);
+  }
+
+  .visually-hidden:where(:not(:focus-within, :active)) {
+    position: absolute !important;
+    clip-path: inset(50%) !important;
+    overflow: hidden !important;
+    width: 1px !important;
+    height: 1px !important;
+    margin: -1px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    white-space: nowrap !important;
   }
 </style>

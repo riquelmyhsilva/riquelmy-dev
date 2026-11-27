@@ -1,0 +1,35 @@
+---
+title: "Agente de Triagem de Suporte a Pedidos"
+description: "Microsserviço de triagem de suporte a pedidos com FastAPI, Google Gemini API, RAG sobre políticas de negócio, Tool Calling, memória multi-turn, Guardrails determinísticos, Chat UI com AI Inspector e suíte de Evals automatizadas com pytest + CI no GitHub Actions."
+stack: ["Python", "FastAPI", "Gemini API", "RAG", "Guardrails", "pytest", "Docker"]
+githubUrl: "https://github.com/riquelmyhsilva/order-support-agent"
+featured: true
+---
+
+## Visão Geral & Problema
+
+Em fluxos de suporte a pedidos, o atendimento precisa conciliar consultas a dados transacionais em tempo real com regras e políticas de negócio bem definidas. Sistemas baseados apenas em prompts abertos correm o risco de alucinar políticas, executar ações fora de escopo ou perder o contexto ao longo de conversas multi-turn.
+
+Este projeto implementa um microsserviço de triagem de suporte a pedidos orientado à produção, combinando **RAG (Retrieval-Augmented Generation)** sobre políticas de negócio, **Tool Calling** estruturado e **Guardrails determinísticos** para garantir respostas auditáveis e seguras.
+
+## Arquitetura & Solução
+
+A solução foi desenhada como um serviço modular em **FastAPI** integrado à **Google Gemini API**, organizado nos seguintes blocos principais:
+
+- **RAG sobre Políticas de Negócio**: recuperação contextual das regras de atendimento, prazos, trocas e cancelamentos antes da geração da resposta.
+- **Tool Calling & Memória Multi-turn**: invocação controlada de ferramentas para consulta de status de pedidos e manutenção do estado da sessão ao longo da conversa.
+- **Guardrails Determinísticos**: validação de entrada e saída para bloquear comportamentos fora de política e assegurar conformidade nas respostas.
+- **Chat UI com AI Inspector**: interface interativa que permite testar o agente e inspecionar em tempo real o raciocínio, as ferramentas acionadas e os trechos recuperados.
+- **Suíte de Evals Automatizadas**: bateria de testes com `pytest` integrada ao pipeline de CI no **GitHub Actions** para detectar regressões de comportamento.
+
+## Stack & Decisões Técnicas
+
+- **Python & FastAPI**: exposição de endpoints assíncronos, tipados e de baixa latência para integração do agente.
+- **Google Gemini API**: modelo base para raciocínio multi-turn, geração ancorada em contexto e chamada nativa de ferramentas (*Tool Calling*).
+- **RAG & Guardrails**: separação clara entre conhecimento estático/normativo (políticas recuperadas via RAG) e regras determinísticas de segurança (Guardrails).
+- **pytest + GitHub Actions + Docker**: empacotamento reprodutível em containers e avaliação contínua (Evals) a cada alteração no repositório.
+
+## Resultados & Aprendizados
+
+- Demonstração prática de um ciclo completo de **AI Engineering**, indo além do protótipo de chat para incluir observabilidade (*AI Inspector*), barreiras determinísticas e testes automatizados de qualidade.
+- Estrutura pronta para expansão de novas ferramentas de consulta, políticas adicionais na base de conhecimento e novos cenários de avaliação no pipeline de CI.

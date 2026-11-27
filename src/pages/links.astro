@@ -1,0 +1,819 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+import ThemeToggle from '@components/ThemeToggle.astro';
+import { DRIVE_LINKS, resolveDriveItem } from '@/data/links';
+
+const items = DRIVE_LINKS.map(resolveDriveItem);
+
+const categoryCounts = new Map<string, number>();
+for (const item of items) {
+  const category = item.category.trim();
+  if (!category) continue;
+  categoryCounts.set(category, (categoryCounts.get(category) ?? 0) + 1);
+}
+const categories = [...categoryCounts.entries()];
+
+const normalizeSearchText = (value: string): string =>
+  value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
+
+const preparedItems = items.map((item) => ({
+  ...item,
+  normalizedCategory: item.category.trim(),
+  searchIndex: normalizeSearchText(
+    [item.title, item.description, item.category, item.fileType ?? ''].join(' '),
+  ),
+}));
+---
+
+<BaseLayout
+  title="Arquivos Rápidos | riquelmy.dev"
+  description="Diretório pessoal de acesso rápido a arquivos e pastas no Google Drive."
+  lang="pt"
+  noindex={true}
+  minimal={true}
+>
+  <div class="links-page bg-[var(--color-bg)] text-[var(--color-text)]">
+    <div class="container-main links-shell">
+      <header class="links-header border-b border-[var(--color-border)]">
+        <div class="links-header__copy">
+          <p class="links-header__eyebrow text-[var(--color-accent)]">riquelmy.dev / arquivos</p>
+          <h1 class="links-header__title text-[var(--color-text)]">Arquivos Rápidos</h1>
+          <p class="links-header__subtitle text-[var(--color-text-muted)]">
+            Acesso direto a documentos, utilitários e pastas compartilhadas no Google Drive.
+          </p>
+        </div>
+        <div class="links-header__actions">
+          <ThemeToggle />
+        </div>
+      </header>
+
+      <search class="links-controls" aria-label="Buscar e filtrar arquivos">
+        <form id="links-filter-form" class="links-search-form">
+          <label for="links-search" class="links-search__label text-[var(--color-text)]">
+            Buscar arquivo
+          </label>
+          <div class="links-search__field bg-[var(--color-surface)] border border-[var(--color-border)]">
+            <svg
+              class="links-search__icon text-[var(--color-text-muted)]"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              width="18"
+              height="18"
+              aria-hidden="true"
+            >
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <input
+              type="search"
+              id="links-search"
+              name="q"
+              class="links-search__input text-[var(--color-text)]"
+              placeholder="Filtrar por nome, descrição, categoria ou tipo..."
+              autocomplete="off"
+              autocorrect="off"
+              autocapitalize="none"
+              spellcheck="false"
+              enterkeyhint="search"
+              aria-describedby="links-search-hint"
+            />
+            <button
+              type="button"
+              id="links-search-clear"
+              class="links-search__clear text-[var(--color-text-muted)]"
+              aria-label="Limpar busca"
+              hidden
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                width="16"
+                height="16"
+                aria-hidden="true"
+              >
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+          </div>
+          <p id="links-search-hint" class="links-search__hint text-[var(--color-text-muted)]">
+            Dica: pressione <kbd class="links-kbd border border-[var(--color-border)] bg-[var(--color-surface)]">/</kbd> para focar na busca.
+          </p>
+        </form>
+
+        {categories.length > 0 && (
+          <div class="links-categories" id="links-categories" role="group" aria-label="Filtrar por categoria">
+            <button
+              type="button"
+              class="category-pill category-pill--active"
+              data-category="all"
+              aria-pressed="true"
+            >
+              <span>Todos</span>
+              <span class="category-pill__count">({preparedItems.length})</span>
+            </button>
+            {categories.map(([category, count]) => (
+              <button
+                type="button"
+                class="category-pill"
+                data-category={category}
+                aria-pressed="false"
+              >
+                <span>{category}</span>
+                <span class="category-pill__count">({count})</span>
+              </button>
+            ))}
+          </div>
+        )}
+
+        <div class="links-status-bar">
+          <p id="links-visible-count" class="links-status text-[var(--color-text-muted)]">
+            Exibindo {preparedItems.length} de {preparedItems.length}{' '}
+            {preparedItems.length === 1 ? 'item' : 'itens'}
+          </p>
+          <div id="links-announcer" class="visually-hidden" role="status" aria-live="polite" aria-atomic="true"></div>
+        </div>
+      </search>
+
+      {preparedItems.length > 0 ? (
+        <>
+          <ul id="links-grid" class="links-grid" role="list">
+            {preparedItems.map((item) => (
+              <li
+                class="links-card bg-[var(--color-surface)] border border-[var(--color-border)]"
+                data-category={item.normalizedCategory}
+                data-search={item.searchIndex}
+              >
+                <article class="links-card__inner">
+                  <div class="links-card__meta">
+                    <span class="links-badge links-badge--category bg-[var(--color-tag-bg)] text-[var(--color-tag-text)]">
+                      {item.category}
+                    </span>
+                    {item.fileType && (
+                      <span class="links-badge links-badge--type border border-[var(--color-border)] text-[var(--color-text-muted)]">
+                        {item.fileType}
+                      </span>
+                    )}
+                  </div>
+
+                  <h2 class="links-card__title text-[var(--color-text)]">{item.title}</h2>
+
+                  {item.description && (
+                    <p class="links-card__desc text-[var(--color-text-muted)]">{item.description}</p>
+                  )}
+
+                  <div class="links-card__actions">
+                    {item.resolvedViewUrl && (
+                      <a
+                        href={item.resolvedViewUrl}
+                        class="action-btn action-btn--primary"
+                        target="_blank"
+                        rel={item.isExternalView ? 'noopener noreferrer nofollow' : 'noopener noreferrer'}
+                        data-astro-prefetch="false"
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          width="16"
+                          height="16"
+                          aria-hidden="true"
+                        >
+                          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                          <polyline points="15 3 21 3 21 9" />
+                          <line x1="10" y1="14" x2="21" y2="3" />
+                        </svg>
+                        <span>{item.isFolderItem ? 'Abrir pasta' : 'Visualizar'}</span>
+                        <span class="visually-hidden"> — {item.title}</span>
+                      </a>
+                    )}
+
+                    {!item.isFolderItem && item.resolvedDownloadUrl && (
+                      <a
+                        href={item.resolvedDownloadUrl}
+                        class="action-btn action-btn--secondary border border-[var(--color-border)] text-[var(--color-text)]"
+                        target={item.isExternalDownload ? '_blank' : undefined}
+                        rel={item.isExternalDownload ? 'noopener noreferrer nofollow' : undefined}
+                        download={!item.isExternalDownload ? (item.downloadFilename || true) : undefined}
+                        data-astro-prefetch="false"
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          width="16"
+                          height="16"
+                          aria-hidden="true"
+                        >
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                          <polyline points="7 10 12 15 17 10" />
+                          <line x1="12" y1="15" x2="12" y2="3" />
+                        </svg>
+                        <span>Baixar</span>
+                        <span class="visually-hidden"> — {item.title}</span>
+                      </a>
+                    )}
+                  </div>
+                </article>
+              </li>
+            ))}
+          </ul>
+
+          <div id="links-empty" class="links-empty bg-[var(--color-surface)] border border-[var(--color-border)]" hidden>
+            <p class="links-empty__title text-[var(--color-text)]">Nenhum arquivo encontrado</p>
+            <p class="links-empty__desc text-[var(--color-text-muted)]">
+              Ajuste o termo de busca ou selecione outra categoria para visualizar os arquivos disponíveis.
+            </p>
+            <button type="button" id="links-reset-btn" class="links-empty__reset">
+              Limpar filtros
+            </button>
+          </div>
+        </>
+      ) : (
+        <div class="links-empty bg-[var(--color-surface)] border border-[var(--color-border)]">
+          <p class="links-empty__title text-[var(--color-text)]">Nenhum item configurado</p>
+          <p class="links-empty__desc text-[var(--color-text-muted)]">
+            Adicione arquivos em <code>src/data/links.ts</code> para exibi-los aqui.
+          </p>
+        </div>
+      )}
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  const form = document.getElementById('links-filter-form') as HTMLFormElement | null;
+  const searchInput = document.getElementById('links-search') as HTMLInputElement | null;
+  const clearBtn = document.getElementById('links-search-clear') as HTMLButtonElement | null;
+  const categoryGroup = document.getElementById('links-categories');
+  const grid = document.getElementById('links-grid');
+  const emptyState = document.getElementById('links-empty');
+  const resetBtn = document.getElementById('links-reset-btn') as HTMLButtonElement | null;
+  const visibleCountEl = document.getElementById('links-visible-count');
+  const announcerEl = document.getElementById('links-announcer');
+
+  if (searchInput && grid) {
+    const cards = Array.from(grid.querySelectorAll<HTMLLIElement>('.links-card'));
+    const categoryButtons = categoryGroup
+      ? Array.from(categoryGroup.querySelectorAll<HTMLButtonElement>('.category-pill'))
+      : [];
+    const totalCount = cards.length;
+    let activeCategory = 'all';
+    let announceTimer: number | undefined;
+
+    const normalize = (value: string): string =>
+      value
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .trim();
+
+    const formatCountText = (visible: number, total: number): string => {
+      if (visible === 0) {
+        return `Nenhum item encontrado entre ${total} disponíveis`;
+      }
+      const noun = total === 1 ? 'item' : 'itens';
+      return `Exibindo ${visible} de ${total} ${noun}`;
+    };
+
+    const scheduleAnnouncement = (message: string, immediate = false) => {
+      if (!announcerEl) return;
+      if (announceTimer !== undefined) {
+        window.clearTimeout(announceTimer);
+      }
+      if (immediate) {
+        announcerEl.textContent = message;
+        return;
+      }
+      announceTimer = window.setTimeout(() => {
+        announcerEl.textContent = message;
+      }, 250);
+    };
+
+    const applyFilters = (immediateAnnouncement = false) => {
+      const query = normalize(searchInput.value);
+      let visibleCount = 0;
+
+      if (clearBtn) {
+        clearBtn.hidden = searchInput.value.length === 0;
+      }
+
+      for (const card of cards) {
+        const cardCategory = card.dataset.category ?? '';
+        const cardSearch = card.dataset.search ?? '';
+        const matchesCategory = activeCategory === 'all' || cardCategory === activeCategory;
+        const matchesQuery = query === '' || cardSearch.includes(query);
+        const isVisible = matchesCategory && matchesQuery;
+
+        card.hidden = !isVisible;
+        if (isVisible) visibleCount += 1;
+      }
+
+      if (emptyState) {
+        emptyState.hidden = visibleCount > 0;
+      }
+
+      const statusMessage = formatCountText(visibleCount, totalCount);
+      if (visibleCountEl) {
+        visibleCountEl.textContent = statusMessage;
+      }
+      scheduleAnnouncement(statusMessage, immediateAnnouncement);
+    };
+
+    const setActiveCategory = (category: string) => {
+      activeCategory = category;
+      for (const btn of categoryButtons) {
+        const isSelected = (btn.dataset.category ?? 'all') === category;
+        btn.classList.toggle('category-pill--active', isSelected);
+        btn.setAttribute('aria-pressed', String(isSelected));
+      }
+      applyFilters(true);
+    };
+
+    form?.addEventListener('submit', (event) => {
+      event.preventDefault();
+    });
+
+    searchInput.addEventListener('input', () => {
+      applyFilters(false);
+    });
+
+    searchInput.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && searchInput.value !== '') {
+        event.preventDefault();
+        searchInput.value = '';
+        applyFilters(true);
+      }
+    });
+
+    clearBtn?.addEventListener('click', () => {
+      searchInput.value = '';
+      applyFilters(true);
+      searchInput.focus();
+    });
+
+    categoryGroup?.addEventListener('click', (event) => {
+      const target = event.target as HTMLElement | null;
+      const button = target?.closest<HTMLButtonElement>('.category-pill');
+      if (!button) return;
+      setActiveCategory(button.dataset.category ?? 'all');
+    });
+
+    resetBtn?.addEventListener('click', () => {
+      searchInput.value = '';
+      setActiveCategory('all');
+      searchInput.focus();
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key !== '/' || event.metaKey || event.ctrlKey || event.altKey) {
+        return;
+      }
+      const activeEl = document.activeElement as HTMLElement | null;
+      const tag = activeEl?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || activeEl?.isContentEditable) {
+        return;
+      }
+      event.preventDefault();
+      searchInput.focus();
+      searchInput.select();
+    });
+  }
+</script>
+
+<style>
+  .links-page {
+    min-height: 100dvh;
+    color-scheme: dark;
+  }
+
+  :global(html.light) .links-page {
+    color-scheme: light;
+  }
+
+  .links-shell {
+    padding-top: 2.5rem;
+    padding-bottom: 4rem;
+  }
+
+  /* Header */
+  .links-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding-bottom: 1.5rem;
+    margin-bottom: 1.75rem;
+  }
+
+  .links-header__eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    margin: 0 0 0.375rem;
+  }
+
+  .links-header__title {
+    font-size: clamp(1.625rem, 2.5vw, 2rem);
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    margin: 0 0 0.375rem;
+  }
+
+  .links-header__subtitle {
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    margin: 0;
+    max-width: 58ch;
+  }
+
+  .links-header__actions {
+    flex-shrink: 0;
+    padding-top: 0.125rem;
+  }
+
+  /* Controls & Search */
+  .links-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1.75rem;
+  }
+
+  .links-search-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+  }
+
+  .links-search__label {
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+
+  .links-search__field {
+    position: relative;
+    display: flex;
+    align-items: center;
+    border-radius: 10px;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .links-search__field:has(.links-search__input:focus) {
+    border-color: var(--color-accent);
+  }
+
+  .links-search__field:has(.links-search__input:focus-visible) {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  .links-search__icon {
+    position: absolute;
+    left: 0.875rem;
+    pointer-events: none;
+    flex-shrink: 0;
+  }
+
+  .links-search__input {
+    width: 100%;
+    min-height: 3rem;
+    padding: 0.625rem 3rem 0.625rem 2.75rem;
+    font: inherit;
+    font-size: max(1rem, 1em);
+    background: transparent;
+    border: 0;
+    border-radius: 10px;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+
+  .links-search__input::placeholder {
+    color: var(--color-text-muted);
+    opacity: 0.85;
+  }
+
+  .links-search__input:focus {
+    outline: none;
+  }
+
+  .links-search__input::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  .links-search__clear {
+    position: absolute;
+    right: 0.25rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    cursor: pointer;
+    transition: color 0.15s ease, background-color 0.15s ease;
+  }
+
+  .links-search__clear:hover {
+    color: var(--color-text);
+    background-color: var(--color-surface-hover);
+  }
+
+  .links-search__clear[hidden] {
+    display: none;
+  }
+
+  .links-search__hint {
+    font-size: 0.8125rem;
+    margin: 0.125rem 0 0;
+  }
+
+  .links-kbd {
+    display: inline-block;
+    padding: 0.05rem 0.375rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    border-radius: 4px;
+    line-height: 1.4;
+  }
+
+  /* Category Pills */
+  .links-categories {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .category-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    min-height: 2.375rem;
+    padding: 0.375rem 0.875rem;
+    font-family: var(--font-sans);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    border-radius: 8px;
+    border: 1px solid var(--color-border);
+    background-color: var(--color-surface);
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+  }
+
+  .category-pill:hover {
+    border-color: var(--color-text-muted);
+    background-color: var(--color-surface-hover);
+    color: var(--color-text);
+  }
+
+  .category-pill--active {
+    background-color: var(--color-accent-muted);
+    border-color: var(--color-accent);
+    color: var(--color-text);
+    font-weight: 600;
+  }
+
+  .category-pill--active:hover {
+    background-color: var(--color-accent-muted);
+    border-color: var(--color-accent-hover);
+    color: var(--color-text);
+  }
+
+  .category-pill__count {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    opacity: 0.85;
+  }
+
+  /* Status bar */
+  .links-status-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .links-status {
+    font-size: 0.8125rem;
+    margin: 0;
+  }
+
+  /* Cards Grid */
+  .links-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  @media (min-width: 768px) {
+    .links-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  .links-card {
+    border-radius: 10px;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+  }
+
+  .links-card:hover {
+    border-color: var(--color-accent-muted);
+  }
+
+  .links-card[hidden] {
+    display: none;
+  }
+
+  .links-card__inner {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    height: 100%;
+    padding: 1.375rem;
+  }
+
+  .links-card__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .links-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.6rem;
+    border-radius: 5px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1.4;
+  }
+
+  .links-badge--type {
+    font-family: var(--font-mono);
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
+
+  .links-card__title {
+    font-size: 1.0625rem;
+    font-weight: 600;
+    line-height: 1.35;
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .links-card__desc {
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    margin: 0;
+    flex: 1;
+  }
+
+  .links-card__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.625rem;
+    padding-top: 0.375rem;
+  }
+
+  .action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    min-height: 2.75rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: background-color 0.15s ease, border-color 0.15s ease, filter 0.15s ease;
+  }
+
+  .action-btn--primary {
+    background-color: var(--color-accent);
+    color: #0b0b0c;
+  }
+
+  .action-btn--primary:hover {
+    color: #0b0b0c;
+    filter: brightness(1.08);
+  }
+
+  .action-btn--secondary {
+    background-color: transparent;
+  }
+
+  .action-btn--secondary:hover {
+    background-color: var(--color-surface-hover);
+    border-color: var(--color-text-muted);
+    color: var(--color-text);
+  }
+
+  /* Empty state */
+  .links-empty {
+    text-align: center;
+    border-radius: 10px;
+    padding: 2.5rem 1.5rem;
+  }
+
+  .links-empty[hidden] {
+    display: none;
+  }
+
+  .links-empty__title {
+    font-size: 1.0625rem;
+    font-weight: 600;
+    margin: 0 0 0.375rem;
+  }
+
+  .links-empty__desc {
+    font-size: 0.9375rem;
+    margin: 0 auto 1.25rem;
+    max-width: 46ch;
+  }
+
+  .links-empty__reset {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.75rem;
+    padding: 0.5rem 1.125rem;
+    font-family: var(--font-sans);
+    font-size: 0.875rem;
+    font-weight: 600;
+    border-radius: 8px;
+    border: 1px solid var(--color-accent);
+    background-color: var(--color-accent-muted);
+    color: var(--color-text);
+    cursor: pointer;
+    transition: border-color 0.15s ease, filter 0.15s ease;
+  }
+
+  .links-empty__reset:hover {
+    border-color: var(--color-accent-hover);
+    filter: brightness(1.08);
+  }
+
+  @media (pointer: coarse) {
+    .links-search__input {
+      min-height: 3.25rem;
+    }
+
+    .links-search__clear,
+    .category-pill,
+    .action-btn,
+    .links-empty__reset {
+      min-height: 3rem;
+    }
+  }
+
+  @media (forced-colors: active) {
+    .category-pill--active {
+      border: 2px solid Highlight;
+      outline: 2px solid Highlight;
+    }
+
+    .action-btn--primary {
+      border: 2px solid ButtonText;
+    }
+  }
+
+  .visually-hidden:where(:not(:focus-within, :active)) {
+    position: absolute !important;
+    clip-path: inset(50%) !important;
+    overflow: hidden !important;
+    width: 1px !important;
+    height: 1px !important;
+    margin: -1px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    white-space: nowrap !important;
+  }
+</style>

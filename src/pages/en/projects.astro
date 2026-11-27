@@ -34,6 +34,7 @@ const projects = allProjects.sort((a, b) => {
           title={project.data.title}
           description={project.data.description}
           stack={project.data.stack}
+          slug={project.id}
           githubUrl={project.data.githubUrl}
           liveUrl={project.data.liveUrl}
           lang="en"
@@ -49,7 +50,8 @@ const projects = allProjects.sort((a, b) => {
 
 <style>
   .projects-page {
-    padding: 3rem 0 2rem;
+    padding-top: 3rem;
+    padding-bottom: 2rem;
   }
 
   .projects-page__header {
@@ -76,7 +78,7 @@ const projects = allProjects.sort((a, b) => {
   }
 
   @media (min-width: 640px) {
-    .projects-grid {
+    .projects-page__grid {
       grid-template-columns: repeat(2, 1fr);
     }
   }
