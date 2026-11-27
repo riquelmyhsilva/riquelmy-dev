@@ -9,12 +9,13 @@ export async function GET(context: APIContext) {
   return rss({
     title: 'Riquelmy Henrique Silva',
     description: 'Technical articles on data science, machine learning, business intelligence, programming, and infrastructure.',
-    site: context.site!,
+    site: new URL('/en', context.site!),
+    trailingSlash: false,
     items: sorted.map((post) => ({
       title: post.data.title,
       description: post.data.description,
       pubDate: post.data.date,
-      link: `/en/blog/${post.id.replace(/^en\//, '')}/`,
+      link: `/en/blog/${post.id.replace(/^en\//, '')}`,
     })),
     customData: '<language>en-us</language>',
   });

@@ -16,7 +16,7 @@ const blogHref = lang === 'en' ? '/en/blog' : '/blog';
   {tags.map((tag) => (
     <li>
       {linked ? (
-        <a href={`${blogHref}?tag=${encodeURIComponent(tag)}`} class="tag">{tag}</a>
+        <a href={`${blogHref}?tag=${encodeURIComponent(tag)}`} class="tag" data-astro-prefetch="false">{tag}</a>
       ) : (
         <span class="tag">{tag}</span>
       )}

@@ -30,8 +30,8 @@ const featuredProjects = await getCollection('projects', ({ id, data }) => data.
         {t('hero.bio')}
       </p>
       <div class="hero__links">
-        <a href="/blog" class="hero__cta hero__cta--primary">{t('hero.ctaBlog')}</a>
-        <a href="/projects" class="hero__cta hero__cta--secondary">{t('hero.ctaProjects')}</a>
+        <a href="/blog" class="hero__cta hero__cta--primary" data-astro-prefetch>{t('hero.ctaBlog')}</a>
+        <a href="/projects" class="hero__cta hero__cta--secondary" data-astro-prefetch>{t('hero.ctaProjects')}</a>
       </div>
     </div>
   </section>

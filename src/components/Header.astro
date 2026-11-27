@@ -21,7 +21,7 @@ const currentPath = Astro.url.pathname;
 <div class="header-spacer" aria-hidden="true"></div>
 <header class="header" id="site-header" transition:animate="none">
   <div class="header__inner">
-    <a href={homeHref} class="header__logo" aria-label="Home">
+    <a href={homeHref} class="header__logo" aria-label="Home" data-astro-prefetch>
       riquelmy.dev
     </a>
 
@@ -34,6 +34,7 @@ const currentPath = Astro.url.pathname;
               <a
                 href={href}
                 class:list={['header__link', { 'header__link--active': isActive }]}
+                data-astro-prefetch
               >
                 {label}
                 {isActive && <span class="header__indicator" transition:name="nav-indicator" aria-hidden="true"></span>}

@@ -257,147 +257,148 @@ const preparedItems = items.map((item) => ({
       )}
     </div>
   </div>
-</BaseLayout>
 
-<script>
-  const form = document.getElementById('links-filter-form') as HTMLFormElement | null;
-  const searchInput = document.getElementById('links-search') as HTMLInputElement | null;
-  const clearBtn = document.getElementById('links-search-clear') as HTMLButtonElement | null;
-  const categoryGroup = document.getElementById('links-categories');
-  const grid = document.getElementById('links-grid');
-  const emptyState = document.getElementById('links-empty');
-  const resetBtn = document.getElementById('links-reset-btn') as HTMLButtonElement | null;
-  const visibleCountEl = document.getElementById('links-visible-count');
-  const announcerEl = document.getElementById('links-announcer');
+  <script>
+    const form = document.getElementById('links-filter-form') as HTMLFormElement | null;
+    const searchInput = document.getElementById('links-search') as HTMLInputElement | null;
+    const clearBtn = document.getElementById('links-search-clear') as HTMLButtonElement | null;
+    const categoryGroup = document.getElementById('links-categories');
+    const grid = document.getElementById('links-grid');
+    const emptyState = document.getElementById('links-empty');
+    const resetBtn = document.getElementById('links-reset-btn') as HTMLButtonElement | null;
+    const visibleCountEl = document.getElementById('links-visible-count');
+    const announcerEl = document.getElementById('links-announcer');
 
-  if (searchInput && grid) {
-    const cards = Array.from(grid.querySelectorAll<HTMLLIElement>('.links-card'));
-    const categoryButtons = categoryGroup
-      ? Array.from(categoryGroup.querySelectorAll<HTMLButtonElement>('.category-pill'))
-      : [];
-    const totalCount = cards.length;
-    let activeCategory = 'all';
-    let announceTimer: number | undefined;
+    if (searchInput && grid) {
+      const cards = Array.from(grid.querySelectorAll<HTMLLIElement>('.links-card'));
+      const categoryButtons = categoryGroup
+        ? Array.from(categoryGroup.querySelectorAll<HTMLButtonElement>('.category-pill'))
+        : [];
+      const totalCount = cards.length;
+      let activeCategory = 'all';
+      let announceTimer: number | undefined;
 
-    const normalize = (value: string): string =>
-      value
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .toLowerCase()
-        .trim();
+      const normalize = (value: string): string =>
+        value
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .toLowerCase()
+          .trim();
 
-    const formatCountText = (visible: number, total: number): string => {
-      if (visible === 0) {
-        return `Nenhum item encontrado entre ${total} disponíveis`;
-      }
-      const noun = total === 1 ? 'item' : 'itens';
-      return `Exibindo ${visible} de ${total} ${noun}`;
-    };
+      const formatCountText = (visible: number, total: number): string => {
+        if (visible === 0) {
+          return `Nenhum item encontrado entre ${total} disponíveis`;
+        }
+        const noun = total === 1 ? 'item' : 'itens';
+        return `Exibindo ${visible} de ${total} ${noun}`;
+      };
 
-    const scheduleAnnouncement = (message: string, immediate = false) => {
-      if (!announcerEl) return;
-      if (announceTimer !== undefined) {
-        window.clearTimeout(announceTimer);
-      }
-      if (immediate) {
-        announcerEl.textContent = message;
-        return;
-      }
-      announceTimer = window.setTimeout(() => {
-        announcerEl.textContent = message;
-      }, 250);
-    };
+      const scheduleAnnouncement = (message: string, immediate = false) => {
+        if (!announcerEl) return;
+        if (announceTimer !== undefined) {
+          window.clearTimeout(announceTimer);
+        }
+        if (immediate) {
+          announcerEl.textContent = message;
+          return;
+        }
+        announceTimer = window.setTimeout(() => {
+          announcerEl.textContent = message;
+        }, 250);
+      };
 
-    const applyFilters = (immediateAnnouncement = false) => {
-      const query = normalize(searchInput.value);
-      let visibleCount = 0;
+      const applyFilters = (immediateAnnouncement = false) => {
+        const query = normalize(searchInput.value);
+        let visibleCount = 0;
 
-      if (clearBtn) {
-        clearBtn.hidden = searchInput.value.length === 0;
-      }
+        if (clearBtn) {
+          clearBtn.hidden = searchInput.value.length === 0;
+        }
 
-      for (const card of cards) {
-        const cardCategory = card.dataset.category ?? '';
-        const cardSearch = card.dataset.search ?? '';
-        const matchesCategory = activeCategory === 'all' || cardCategory === activeCategory;
-        const matchesQuery = query === '' || cardSearch.includes(query);
-        const isVisible = matchesCategory && matchesQuery;
+        for (const card of cards) {
+          const cardCategory = card.dataset.category ?? '';
+          const cardSearch = card.dataset.search ?? '';
+          const matchesCategory = activeCategory === 'all' || cardCategory === activeCategory;
+          const matchesQuery = query === '' || cardSearch.includes(query);
+          const isVisible = matchesCategory && matchesQuery;
 
-        card.hidden = !isVisible;
-        if (isVisible) visibleCount += 1;
-      }
+          card.hidden = !isVisible;
+          if (isVisible) visibleCount += 1;
+        }
 
-      if (emptyState) {
-        emptyState.hidden = visibleCount > 0;
-      }
+        if (emptyState) {
+          emptyState.hidden = visibleCount > 0;
+        }
 
-      const statusMessage = formatCountText(visibleCount, totalCount);
-      if (visibleCountEl) {
-        visibleCountEl.textContent = statusMessage;
-      }
-      scheduleAnnouncement(statusMessage, immediateAnnouncement);
-    };
+        const statusMessage = formatCountText(visibleCount, totalCount);
+        if (visibleCountEl) {
+          visibleCountEl.textContent = statusMessage;
+        }
+        scheduleAnnouncement(statusMessage, immediateAnnouncement);
+      };
 
-    const setActiveCategory = (category: string) => {
-      activeCategory = category;
-      for (const btn of categoryButtons) {
-        const isSelected = (btn.dataset.category ?? 'all') === category;
-        btn.classList.toggle('category-pill--active', isSelected);
-        btn.setAttribute('aria-pressed', String(isSelected));
-      }
-      applyFilters(true);
-    };
+      const setActiveCategory = (category: string) => {
+        activeCategory = category;
+        for (const btn of categoryButtons) {
+          const isSelected = (btn.dataset.category ?? 'all') === category;
+          btn.classList.toggle('category-pill--active', isSelected);
+          btn.setAttribute('aria-pressed', String(isSelected));
+        }
+        applyFilters(true);
+      };
 
-    form?.addEventListener('submit', (event) => {
-      event.preventDefault();
-    });
-
-    searchInput.addEventListener('input', () => {
-      applyFilters(false);
-    });
-
-    searchInput.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape' && searchInput.value !== '') {
+      form?.addEventListener('submit', (event) => {
         event.preventDefault();
+      });
+
+      searchInput.addEventListener('input', () => {
+        applyFilters(false);
+      });
+
+      searchInput.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && searchInput.value !== '') {
+          event.preventDefault();
+          searchInput.value = '';
+          applyFilters(true);
+        }
+      });
+
+      clearBtn?.addEventListener('click', () => {
         searchInput.value = '';
         applyFilters(true);
-      }
-    });
+        searchInput.focus();
+      });
 
-    clearBtn?.addEventListener('click', () => {
-      searchInput.value = '';
-      applyFilters(true);
-      searchInput.focus();
-    });
+      categoryGroup?.addEventListener('click', (event) => {
+        const target = event.target as HTMLElement | null;
+        const button = target?.closest<HTMLButtonElement>('.category-pill');
+        if (!button) return;
+        setActiveCategory(button.dataset.category ?? 'all');
+      });
 
-    categoryGroup?.addEventListener('click', (event) => {
-      const target = event.target as HTMLElement | null;
-      const button = target?.closest<HTMLButtonElement>('.category-pill');
-      if (!button) return;
-      setActiveCategory(button.dataset.category ?? 'all');
-    });
+      resetBtn?.addEventListener('click', () => {
+        searchInput.value = '';
+        setActiveCategory('all');
+        searchInput.focus();
+      });
 
-    resetBtn?.addEventListener('click', () => {
-      searchInput.value = '';
-      setActiveCategory('all');
-      searchInput.focus();
-    });
-
-    document.addEventListener('keydown', (event) => {
-      if (event.key !== '/' || event.metaKey || event.ctrlKey || event.altKey) {
-        return;
-      }
-      const activeEl = document.activeElement as HTMLElement | null;
-      const tag = activeEl?.tagName;
-      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || activeEl?.isContentEditable) {
-        return;
-      }
-      event.preventDefault();
-      searchInput.focus();
-      searchInput.select();
-    });
-  }
-</script>
+      document.addEventListener('keydown', (event) => {
+        if (!searchInput.isConnected) return;
+        if (event.key !== '/' || event.metaKey || event.ctrlKey || event.altKey) {
+          return;
+        }
+        const activeEl = document.activeElement as HTMLElement | null;
+        const tag = activeEl?.tagName;
+        if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || activeEl?.isContentEditable) {
+          return;
+        }
+        event.preventDefault();
+        searchInput.focus();
+        searchInput.select();
+      });
+    }
+  </script>
+</BaseLayout>
 
 <style>
   .links-page {

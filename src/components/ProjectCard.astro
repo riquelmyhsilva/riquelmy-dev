@@ -23,7 +23,7 @@ const projectHref = cleanSlug
 <article class="project-card">
   <h3 class="project-card__title">
     {projectHref ? (
-      <a href={projectHref} class="project-card__main-link card-link">
+      <a href={projectHref} class="project-card__main-link card-link" data-astro-prefetch>
         {title}
       </a>
     ) : (

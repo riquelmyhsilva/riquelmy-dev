@@ -2,6 +2,9 @@
 
 A static portfolio site and technical blog built with Astro 5, MDX, and Tailwind CSS 4. Deployed to Firebase Hosting.
 
+<img width="1920" height="928" alt="image" src="https://github.com/user-attachments/assets/b1eee469-771c-44ec-996a-449e7adec69e" />
+
+
 ## Tech Stack
 
 - **Framework**: Astro 5 (static output)

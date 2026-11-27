@@ -13,14 +13,21 @@ const blog = defineCollection({
   }),
 });
 
+const httpsUrl = z
+  .string()
+  .url()
+  .refine((val) => new URL(val).protocol === 'https:', {
+    message: 'URL must use the https:// protocol',
+  });
+
 const projects = defineCollection({
   loader: glob({ base: './src/content/projects', pattern: '**/*.{md,mdx}' }),
   schema: z.object({
     title: z.string(),
     description: z.string(),
     stack: z.array(z.string()),
-    githubUrl: z.string().optional(),
-    liveUrl: z.string().optional(),
+    githubUrl: httpsUrl.optional(),
+    liveUrl: httpsUrl.optional(),
     featured: z.boolean().default(false),
     date: z.coerce.date().optional(),
     status: z.string().optional(),
